@@ -1,0 +1,1 @@
+C:\GitHub\ChessTrainerApp\ChessTrainerApp.csproj;x64

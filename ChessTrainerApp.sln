@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessTrainerApp", "ChessTrainerApp.csproj", "{491C9334-B719-84D2-6CE0-1E1855C3B355}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{491C9334-B719-84D2-6CE0-1E1855C3B355}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{491C9334-B719-84D2-6CE0-1E1855C3B355}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{491C9334-B719-84D2-6CE0-1E1855C3B355}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{491C9334-B719-84D2-6CE0-1E1855C3B355}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {98141398-FD94-4E7F-91F9-2F9F930BB84A}
+	EndGlobalSection
+EndGlobal
