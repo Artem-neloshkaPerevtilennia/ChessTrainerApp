@@ -22,7 +22,7 @@ public partial class MainPage : ContentPage
 		await Navigation.PushAsync(new SettingsPage());
 	}
 
-	// private void OnGuit(object sender, EventArgs e)
+	// private void OnQuit(object sender, EventArgs e)
     // {
     // }
 }

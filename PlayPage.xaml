@@ -5,18 +5,136 @@
              Title="Play a game">
 
     <Grid>
-        <Image Source="homepage.webp"
-            Aspect="AspectFill"
-            Opacity="0.60"/>
 
-        <Grid RowDefinitions="0.2*, 0.8*" ColumnDefinitions="0.5*, 3*, 0.5*">
-            <FlexLayout Direction="Column" Grid.Row="1" Grid.Column="1">
-                <Button Text="Початок гри" Style="{StaticResource HomePageBtn}"></Button>
-                <Button Text="Архів партій" Style="{StaticResource HomePageBtn}"></Button>
-                <Button Text="Налаштування" Style="{StaticResource HomePageBtn}"></Button>
-                <Button Text="Вихід" Style="{StaticResource HomePageBtn}"></Button>
-            </FlexLayout>
+        <!-- 🔹 Фон -->
+        <Image Source="homepage.webp"
+               Aspect="AspectFill"
+               Opacity="0.60"
+               ZIndex="0"/>
+
+        <!-- 🔹 Основний контент -->
+        <Grid RowDefinitions="0.2*, 0.8*"
+              ColumnDefinitions="0.5*, 3*, 0.5*"
+              ZIndex="1">
+
+            <VerticalStackLayout Grid.Row="1"
+                                 Grid.Column="1"
+                                 Spacing="25"
+                                 VerticalOptions="Center"
+                                 HorizontalOptions="Fill">
+
+                <!-- 🔸 Блок "Я граю за" -->
+                <VerticalStackLayout Spacing="10">
+
+                    <Label Text="Я граю за"
+                           FontSize="22"
+                           TextColor="White"
+                           BackgroundColor="#80000000"
+                           HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center" />
+
+                    <HorizontalStackLayout Spacing="25"
+                                           HorizontalOptions="Center">
+
+                        <ImageButton Source="dotnet_bot.png"
+                                     WidthRequest="80"
+                                     HeightRequest="80"
+                                     BackgroundColor="#00000030"
+                                     CornerRadius="20"/>
+
+                        <ImageButton Source="homepage.png"
+                                     WidthRequest="80"
+                                     HeightRequest="80"
+                                     BackgroundColor="#00000030"
+                                     CornerRadius="20"/>
+                    </HorizontalStackLayout>
+
+                </VerticalStackLayout>
+
+
+                <!-- 🔸 Блок "Складність" -->
+                <VerticalStackLayout Spacing="5">
+
+                    <Label Text="Складність"
+                           FontSize="22"
+                           TextColor="White"
+                           BackgroundColor="#80000000"
+                           HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center" />
+
+                    <Frame BackgroundColor="#80000060"
+                           CornerRadius="12"
+                           Padding="5"
+                           BorderColor="White"
+                           HorizontalOptions="Center">
+
+                        <Picker x:Name="DifficultyPicker"
+                                Title="Оберіть складність"
+                                FontSize="20"
+                                TextColor="White"
+                                TitleColor="#CCCCCC"
+                                WidthRequest="240">
+
+                            <Picker.Items>
+                                <x:String>Легка</x:String>
+                                <x:String>Середня</x:String>
+                                <x:String>Важка</x:String>
+                            </Picker.Items>
+
+                        </Picker>
+
+                    </Frame>
+
+                </VerticalStackLayout>
+
+
+                <!-- 🔸 Блок "Режим гри" -->
+                <VerticalStackLayout Spacing="5">
+
+                    <Label Text="Режим"
+                           FontSize="22"
+                           TextColor="White"
+                           BackgroundColor="#80000000"
+                           HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center" />
+
+                    <Frame BackgroundColor="#80000060"
+                           CornerRadius="12"
+                           Padding="5"
+                           BorderColor="White"
+                           HorizontalOptions="Center">
+
+                        <Picker x:Name="GameModePicker"
+                                Title="Оберіть режим"
+                                FontSize="20"
+                                TextColor="White"
+                                TitleColor="#CCCCCC"
+                                WidthRequest="240">
+
+                            <Picker.Items>
+                                <x:String>Навчальний</x:String>
+                                <x:String>Дослідник</x:String>
+                                <x:String>Виклик</x:String>
+                            </Picker.Items>
+
+                        </Picker>
+
+                    </Frame>
+
+                </VerticalStackLayout>
+
+
+                <!-- 🟢 Кнопка старту гри -->
+                <Button Text="Почати гру!"
+                        Style="{StaticResource HomePageBtn}"
+                        HeightRequest="60"
+                        CornerRadius="15"
+                        BackgroundColor="Green"/>
+
+            </VerticalStackLayout>
+
         </Grid>
+
     </Grid>
 
 </ContentPage>
