@@ -6,5 +6,23 @@ public partial class MainPage : ContentPage
 	{
 		InitializeComponent();
 	}
-}
 
+	private async void OnGoToPlayPage(object sender, EventArgs e)
+	{
+		await Navigation.PushAsync(new PlayPage());
+	}
+
+	private async void OnGoToArchievePage(object sender, EventArgs e)
+	{
+		await Navigation.PushAsync(new ArchievePage());
+	}
+
+	private async void OnGoToSettingsPage(object sender, EventArgs e)
+	{
+		await Navigation.PushAsync(new SettingsPage());
+	}
+
+	// private void OnGuit(object sender, EventArgs e)
+    // {
+    // }
+}

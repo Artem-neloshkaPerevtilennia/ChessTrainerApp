@@ -1048,3 +1048,4 @@ C:\GitHub\ChessTrainerApp\obj\Debug\net8.0-android\stamp\_GeneratePackageManager
 C:\GitHub\ChessTrainerApp\obj\Debug\net8.0-android\stamp\_ResolveLibraryProjectImports.stamp
 C:\GitHub\ChessTrainerApp\obj\Debug\net8.0-android\android\assets\System.Private.CoreLib.dll
 C:\GitHub\ChessTrainerApp\obj\Debug\net8.0-android\resizetizer\r\drawable\homepage.webp
+C:\GitHub\ChessTrainerApp\obj\Debug\net8.0-android\ChessTrainerApp.sourcelink.json

@@ -28,11 +28,23 @@ build_metadata.AdditionalFiles.ManifestResourceName = ChessTrainerApp.AppShell.x
 build_metadata.AdditionalFiles.TargetPath = AppShell.xaml
 build_metadata.AdditionalFiles.RelativePath = AppShell.xaml
 
+[C:/GitHub/ChessTrainerApp/Archieve.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = ChessTrainerApp.Archieve.xaml
+build_metadata.AdditionalFiles.TargetPath = Archieve.xaml
+build_metadata.AdditionalFiles.RelativePath = Archieve.xaml
+
 [C:/GitHub/ChessTrainerApp/MainPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = ChessTrainerApp.MainPage.xaml
 build_metadata.AdditionalFiles.TargetPath = MainPage.xaml
 build_metadata.AdditionalFiles.RelativePath = MainPage.xaml
+
+[C:/GitHub/ChessTrainerApp/PlayPage.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = ChessTrainerApp.PlayPage.xaml
+build_metadata.AdditionalFiles.TargetPath = PlayPage.xaml
+build_metadata.AdditionalFiles.RelativePath = PlayPage.xaml
 
 [C:/GitHub/ChessTrainerApp/Resources/Styles/Colors.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
@@ -45,3 +57,9 @@ build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = ChessTrainerApp.Resources.Styles.Styles.xaml
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Styles.xaml
 build_metadata.AdditionalFiles.RelativePath = Resources\Styles\Styles.xaml
+
+[C:/GitHub/ChessTrainerApp/SettingsPage.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = ChessTrainerApp.SettingsPage.xaml
+build_metadata.AdditionalFiles.TargetPath = SettingsPage.xaml
+build_metadata.AdditionalFiles.RelativePath = SettingsPage.xaml
