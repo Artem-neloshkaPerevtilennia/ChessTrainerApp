@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "CYlHoD+oLEKihfmUxlbL+RGCLzlQHZlQvuEbWbt//6lkL/nGYAh3ssVgfUqxB5Hf9zCf3rYNDzkkpxvIdxBKeA==",
+  "dgSpecHash": "iwkL3gDD+Zzgr+9R+hUEblvI6B6hRsFPKZ56MUZUb04VYecV4/0Zsel/9q7wbJeFT7k3zQLqdQ7o8ZQNZHH8dg==",
   "success": true,
   "projectFilePath": "C:\\GitHub\\ChessTrainerApp\\ChessTrainerApp.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\vital\\.nuget\\packages\\communitytoolkit.mvvm\\8.4.0\\communitytoolkit.mvvm.8.4.0.nupkg.sha512",
     "C:\\Users\\vital\\.nuget\\packages\\googlegson\\2.10.1.4\\googlegson.2.10.1.4.nupkg.sha512",
     "C:\\Users\\vital\\.nuget\\packages\\microsoft.extensions.configuration\\8.0.0\\microsoft.extensions.configuration.8.0.0.nupkg.sha512",
     "C:\\Users\\vital\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\8.0.0\\microsoft.extensions.configuration.abstractions.8.0.0.nupkg.sha512",

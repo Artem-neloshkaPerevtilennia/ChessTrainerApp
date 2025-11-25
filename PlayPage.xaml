@@ -129,7 +129,8 @@
                         Style="{StaticResource HomePageBtn}"
                         HeightRequest="60"
                         CornerRadius="15"
-                        BackgroundColor="Green"/>
+                        BackgroundColor="Green"
+                        Clicked="OnStartGame"/>
 
             </VerticalStackLayout>
 

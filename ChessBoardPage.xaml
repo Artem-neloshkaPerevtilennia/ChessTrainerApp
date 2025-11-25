@@ -1,0 +1,53 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:ChessTrainerApp.ViewModels"
+             xmlns:m="clr-namespace:ChessTrainerApp.Models"
+             xmlns:conv="clr-namespace:ChessTrainerApp.Converters"
+             x:Class="ChessTrainerApp.ChessBoardPage"
+             Title="Шахова Дошка">
+
+    <ContentPage.BindingContext>
+        <vm:ChessBoardViewModel />
+    </ContentPage.BindingContext>
+
+    <ContentPage.Resources>
+        <conv:PieceColorToMauiColorConverter x:Key="PieceColorConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="*,8*,*" 
+          ColumnDefinitions="*,8*,*"
+          VerticalOptions="Center" 
+          HorizontalOptions="Center">
+
+        <Grid Grid.Row="1" Grid.Column="1"
+      ColumnDefinitions="*,*,*,*,*,*,*,*"
+      RowDefinitions="*,*,*,*,*,*,*,*"
+      
+      WidthRequest="350"     
+      HeightRequest="350"
+      
+      BackgroundColor="Red" 
+      
+      BindableLayout.ItemsSource="{Binding Squares}"> <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="m:SquareModel">
+                    <Grid Grid.Row="{Binding Row}" Grid.Column="{Binding Column}"
+                        BackgroundColor="{Binding SquareColor}">
+                        
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer 
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ChessBoardViewModel}}, Path=HandleSquareClickCommand}"
+                                CommandParameter="{Binding .}" />
+                        </Grid.GestureRecognizers>
+                        <Label  Text="{Binding Piece.DisplayValue}" 
+                                FontSize="55"
+                                FontAttributes="Bold"
+                                HorizontalOptions="Center" 
+                                VerticalOptions="Center"
+                                TextColor="{Binding Piece.Color, Converter={StaticResource PieceColorConverter}}"
+                                InputTransparent="True"/>
+                    </Grid>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </Grid>
+    </Grid>
+</ContentPage>

@@ -4,5 +4,66 @@
         <name>ChessTrainerApp</name>
     </assembly>
     <members>
+        <member name="T:ChessTrainerApp.Models.SquareModel">
+            <inheritdoc/>
+        </member>
+        <member name="P:ChessTrainerApp.Models.SquareModel.Piece">
+            <inheritdoc cref="F:ChessTrainerApp.Models.SquareModel.piece"/>
+        </member>
+        <member name="P:ChessTrainerApp.Models.SquareModel.SquareColor">
+            <inheritdoc cref="F:ChessTrainerApp.Models.SquareModel.squareColor"/>
+        </member>
+        <member name="T:ChessTrainerApp.ViewModels.ChessBoardViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.SelectedSquare">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.selectedSquare"/>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.CurrentTurn">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.currentTurn"/>
+        </member>
+        <member name="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.handleSquareClickCommand">
+            <summary>The backing field for <see cref="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.HandleSquareClickCommand"/>.</summary>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.HandleSquareClickCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand`1"/> instance wrapping <see cref="M:ChessTrainerApp.ViewModels.ChessBoardViewModel.HandleSquareClick(ChessTrainerApp.Models.SquareModel)"/>.</summary>
+        </member>
+        <member name="T:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs">
+            <summary>
+            A helper type providing cached, reusable <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instances
+            for all properties generated with <see cref="T:CommunityToolkit.Mvvm.ComponentModel.ObservablePropertyAttribute"/>.
+            </summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.Piece">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "Piece" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SquareColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SquareColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SelectedSquare">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SelectedSquare" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.CurrentTurn">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "CurrentTurn" generated properties.</summary>
+        </member>
+        <member name="T:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs">
+            <summary>
+            A helper type providing cached, reusable <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instances
+            for all properties generated with <see cref="T:CommunityToolkit.Mvvm.ComponentModel.ObservablePropertyAttribute"/>.
+            </summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.Piece">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "Piece" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SquareColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SquareColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SelectedSquare">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SelectedSquare" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.CurrentTurn">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "CurrentTurn" generated properties.</summary>
+        </member>
     </members>
 </doc>
