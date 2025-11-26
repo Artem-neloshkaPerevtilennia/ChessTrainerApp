@@ -9,10 +9,19 @@ namespace ChessTrainerApp.ViewModels
     public partial class ChessBoardViewModel : ObservableObject
     {
         // Колекція для відображення дошки (9x9)
-        public ObservableCollection<SquareModel> Squares { get; } 
-        
+        public ObservableCollection<SquareModel> Squares { get; }
+
         [ObservableProperty] // Автоматична генерація OnPropertyChanged
         private SquareModel selectedSquare;
+
+        [ObservableProperty]
+        private GameStatus gameStatus = GameStatus.InProgress;
+
+        [ObservableProperty]
+        private string gameOverMessage = "";
+
+        [ObservableProperty]
+        private bool isGameOver = false; // Щоб показувати Pop-up у XAML
 
         public ChessBoardViewModel()
         {
@@ -36,7 +45,7 @@ namespace ChessTrainerApp.ViewModels
                         Row = r,
                         Column = c,
                         // Змінена логіка кольорів
-                        SquareColor = (r + c) % 2 == 0 ? lightSquare : darkSquare, 
+                        SquareColor = (r + c) % 2 == 0 ? lightSquare : darkSquare,
                         Piece = GetInitialPiece(r, c)
                     };
                     Squares.Add(square);
@@ -50,7 +59,7 @@ namespace ChessTrainerApp.ViewModels
         // Частина класу ChessBoardViewModel
         private PieceModel GetInitialPiece(int r, int c)
         {
-            PieceColor color = (r == 0 || r == 1) ? PieceColor.Black : 
+            PieceColor color = (r == 0 || r == 1) ? PieceColor.Black :
                             (r == 6 || r == 7) ? PieceColor.White : PieceColor.None;
 
             if (color == PieceColor.None)
@@ -83,11 +92,11 @@ namespace ChessTrainerApp.ViewModels
                         break;
                 }
             }
-            
+
             // TODO: Встановити DisplayValue (іконки)
             return new PieceModel { Type = type, Color = color };
         }
-        
+
         // ChessBoardViewModel.cs
         [ObservableProperty]
         private PieceColor currentTurn = PieceColor.White;
@@ -99,11 +108,13 @@ namespace ChessTrainerApp.ViewModels
         [RelayCommand]
         private async Task HandleSquareClick(SquareModel clickedSquare)
         {
+            if (GameStatus != GameStatus.InProgress) return; // 🛑 Стоп гра
+
             // 1. Вибір фігури (Сценарій, коли ще нічого не вибрано)
             if (SelectedSquare == null)
             {
-                if (clickedSquare.Piece.Type != PieceType.None && 
-                    clickedSquare.Piece.Color == CurrentTurn) 
+                if (clickedSquare.Piece.Type != PieceType.None &&
+                    clickedSquare.Piece.Color == CurrentTurn)
                 {
                     SelectedSquare = clickedSquare;
                     SelectedSquare.SquareColor = Color.FromHex("#F6F669"); // Жовтий виділення
@@ -112,7 +123,7 @@ namespace ChessTrainerApp.ViewModels
             }
 
             // 2. Спроба ходу (Фігура вже вибрана)
-            
+
             // Скидаємо колір виділення
             bool isEven = (SelectedSquare.Row + SelectedSquare.Column) % 2 == 0;
             SelectedSquare.SquareColor = isEven ? Color.FromHex("#EEEED2") : Color.FromHex("#769656");
@@ -126,7 +137,7 @@ namespace ChessTrainerApp.ViewModels
             }
 
             // --- ГОЛОВНА ЛОГІКА ХОДУ ---
-            
+
             // Передаємо EnPassantTarget у валідатор!
             if (ChessRules.IsMoveValid(SelectedSquare, clickedSquare, Squares, EnPassantTarget))
             {
@@ -157,10 +168,10 @@ namespace ChessTrainerApp.ViewModels
                 int direction = to.Column - from.Column > 0 ? 1 : -1;
                 int rookOldCol = direction == 1 ? 7 : 0;
                 int rookNewCol = direction == 1 ? 5 : 3;
-                
+
                 var rookOldSq = Squares[from.Row * 8 + rookOldCol];
                 var rookNewSq = Squares[from.Row * 8 + rookNewCol];
-                
+
                 rookNewSq.Piece = rookOldSq.Piece;
                 rookOldSq.Piece = new PieceModel { Type = PieceType.None, Color = PieceColor.None };
                 rookNewSq.Piece.HasMoved = true;
@@ -168,16 +179,16 @@ namespace ChessTrainerApp.ViewModels
 
             // --- 2. EN PASSANT (ВЗЯТТЯ) ---
             // Якщо пішак ходить по діагоналі на порожню клітинку -> це En Passant
-            if (from.Piece.Type == PieceType.Pawn && 
-                from.Column != to.Column && 
+            if (from.Piece.Type == PieceType.Pawn &&
+                from.Column != to.Column &&
                 to.Piece.Type == PieceType.None)
             {
                 // Ворог стоїть на тому ж рядку, звідки ми прийшли, але в колонці, куди ми йдемо
-                int enemyPawnRow = from.Row; 
+                int enemyPawnRow = from.Row;
                 int enemyPawnCol = to.Column;
-                
+
                 var enemyPawnSq = Squares[enemyPawnRow * 8 + enemyPawnCol];
-                
+
                 // З'їдаємо ворога
                 enemyPawnSq.Piece = new PieceModel { Type = PieceType.None, Color = PieceColor.None };
             }
@@ -199,7 +210,7 @@ namespace ChessTrainerApp.ViewModels
                 // Будь-який інший хід скидає можливість En Passant
                 EnPassantTarget = null;
             }
-            
+
             // ❗ SwitchTurn тут НЕ ВИКЛИКАЄМО (як ти і зробив), бо ще може бути Promotion
         }
 
@@ -207,7 +218,7 @@ namespace ChessTrainerApp.ViewModels
         {
             // Показуємо меню і чекаємо відповіді
             string result = await Shell.Current.DisplayActionSheet(
-                "Оберіть фігуру:", null, null, 
+                "Оберіть фігуру:", null, null,
                 "Ферзь", "Тура", "Слон", "Кінь");
 
             // Якщо користувач скасував (клацнув поза меню), за замовчуванням Ферзь
@@ -223,17 +234,45 @@ namespace ChessTrainerApp.ViewModels
             };
 
             // Оновлюємо фігуру на дошці
-            square.Piece = new PieceModel 
-            { 
-                Type = newType, 
-                Color = square.Piece.Color, 
-                HasMoved = true 
+            square.Piece = new PieceModel
+            {
+                Type = newType,
+                Color = square.Piece.Color,
+                HasMoved = true
             };
         }
 
         private void SwitchTurn()
         {
+            // Змінюємо гравця
             CurrentTurn = CurrentTurn == PieceColor.White ? PieceColor.Black : PieceColor.White;
+
+            // ПЕРЕВІРКА НА КІНЕЦЬ ГРИ
+            // 1. Чи є у нового гравця ходи?
+            bool hasMoves = ChessRules.HasAnyLegalMove(CurrentTurn, Squares, EnPassantTarget);
+
+            if (!hasMoves)
+            {
+                // Ходів немає. Перевіряємо, чи це Шах
+                var kingSquare = Squares.FirstOrDefault(s => s.Piece.Type == PieceType.King && s.Piece.Color == CurrentTurn);
+                var enemyColor = CurrentTurn == PieceColor.White ? PieceColor.Black : PieceColor.White;
+                
+                bool isCheck = ChessRules.IsSquareUnderAttack(kingSquare, enemyColor, Squares);
+
+                if (isCheck)
+                {
+                    GameStatus = GameStatus.Checkmate;
+                    GameOverMessage = $"МАТ! Перемогли {enemyColor}";
+                }
+                else
+                {
+                    GameStatus = GameStatus.Stalemate;
+                    GameOverMessage = "ПАТ! Нічия.";
+                }
+
+                IsGameOver = true; // Це має тригерити відображення вікна в UI
+                // Тут можна викликати метод збереження гри в майбутньому
+            }
         }
 
         private void ResetSquareColor(SquareModel square)
@@ -241,7 +280,7 @@ namespace ChessTrainerApp.ViewModels
             // Повертаємо оригінальний колір (зелений або кремовий)
             // Тобі треба буде винести логіку визначення кольору в окремий метод або зберігати оригінальний колір
             bool isEven = (square.Row + square.Column) % 2 == 0;
-            square.SquareColor = isEven ? Color.FromHex("#EEEED2") : Color.FromHex("#769656"); 
+            square.SquareColor = isEven ? Color.FromHex("#EEEED2") : Color.FromHex("#769656");
         }
     }
 }

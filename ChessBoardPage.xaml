@@ -49,5 +49,22 @@
                 </DataTemplate>
             </BindableLayout.ItemTemplate>
         </Grid>
+
+        <BoxView Color="Black" Opacity="0.7" 
+            IsVisible="{Binding IsGameOver}" 
+            Grid.RowSpan="3" Grid.ColumnSpan="3"/>
+
+        <VerticalStackLayout Grid.Row="1" Grid.Column="1" 
+                            VerticalOptions="Center" HorizontalOptions="Center"
+                            Spacing="20"
+                            IsVisible="{Binding IsGameOver}">
+            
+            <Label Text="{Binding GameOverMessage}" 
+                TextColor="White" FontSize="30" FontAttributes="Bold" 
+                HorizontalTextAlignment="Center"/>
+
+            <Button Text="Нова Гра" Command="{Binding RestartGameCommand}" 
+                    BackgroundColor="Green" TextColor="White"/>
+        </VerticalStackLayout>
     </Grid>
 </ContentPage>

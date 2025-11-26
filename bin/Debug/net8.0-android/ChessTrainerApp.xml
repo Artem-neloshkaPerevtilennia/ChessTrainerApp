@@ -20,6 +20,15 @@
         <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.SelectedSquare">
             <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.selectedSquare"/>
         </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.GameStatus">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.gameStatus"/>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.GameOverMessage">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.gameOverMessage"/>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.IsGameOver">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.isGameOver"/>
+        </member>
         <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.CurrentTurn">
             <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.currentTurn"/>
         </member>
@@ -44,6 +53,15 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SelectedSquare">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SelectedSquare" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GameStatus">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GameStatus" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GameOverMessage">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GameOverMessage" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsGameOver">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsGameOver" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.CurrentTurn">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "CurrentTurn" generated properties.</summary>
         </member>
@@ -61,6 +79,15 @@
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SelectedSquare">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SelectedSquare" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GameStatus">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GameStatus" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GameOverMessage">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GameOverMessage" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsGameOver">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsGameOver" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.CurrentTurn">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "CurrentTurn" generated properties.</summary>

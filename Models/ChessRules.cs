@@ -235,4 +235,27 @@ public static class ChessRules
     {
         return board.FirstOrDefault(s => s.Piece.Type == PieceType.King && s.Piece.Color == color);
     }
+
+
+    public static bool HasAnyLegalMove(PieceColor color, ObservableCollection<SquareModel> board, SquareModel enPassantTarget)
+    {
+        // 1. Знаходимо всі фігури гравця
+        var myPiecesSquares = board.Where(s => s.Piece.Type != PieceType.None && s.Piece.Color == color).ToList();
+
+        // 2. Для кожної фігури...
+        foreach (var fromSquare in myPiecesSquares)
+        {
+            // 3. ...перебираємо всі клітинки дошки як потенційні цілі
+            foreach (var toSquare in board)
+            {
+                // Якщо хід легальний (це враховує і захист від шаху!)
+                if (IsMoveValid(fromSquare, toSquare, board, enPassantTarget))
+                {
+                    return true; // Знайшли хоча б один порятунок -> граємо далі
+                }
+            }
+        }
+
+        return false; // Жодного ходу немає -> приїхали (Мат або Пат)
+    }
 }
