@@ -44,6 +44,9 @@ namespace ChessTrainerApp.ViewModels
             }
         }
 
+        // Це "примарна" клітинка позаду пішака, який стрибнув на 2 поля
+        public SquareModel EnPassantTarget { get; set; }
+
         // Частина класу ChessBoardViewModel
         private PieceModel GetInitialPiece(int r, int c)
         {
@@ -90,50 +93,142 @@ namespace ChessTrainerApp.ViewModels
         private PieceColor currentTurn = PieceColor.White;
 
         // Онови метод HandleSquareClick
+        // У ChessBoardViewModel.cs
+
+        // ❗ Зміни void на async Task
         [RelayCommand]
-        private void HandleSquareClick(SquareModel clickedSquare)
+        private async Task HandleSquareClick(SquareModel clickedSquare)
         {
-            // СЦЕНАРІЙ 1: Вибір фігури
+            // 1. Вибір фігури (Сценарій, коли ще нічого не вибрано)
             if (SelectedSquare == null)
             {
-                // Перевіряємо, чи клікнули на фігуру ТА чи це фігура поточного гравця
                 if (clickedSquare.Piece.Type != PieceType.None && 
                     clickedSquare.Piece.Color == CurrentTurn) 
                 {
                     SelectedSquare = clickedSquare;
-                    SelectedSquare.SquareColor = Color.FromHex("#F6F669"); // Жовтий
-                    
-                    // TODO: Тут ми будемо підсвічувати можливі ходи (Step 3)
+                    SelectedSquare.SquareColor = Color.FromHex("#F6F669"); // Жовтий виділення
                 }
+                return; // Виходимо, чекаємо наступного кліку
             }
-            // СЦЕНАРІЙ 2: Спроба ходу
-            else
+
+            // 2. Спроба ходу (Фігура вже вибрана)
+            
+            // Скидаємо колір виділення
+            bool isEven = (SelectedSquare.Row + SelectedSquare.Column) % 2 == 0;
+            SelectedSquare.SquareColor = isEven ? Color.FromHex("#EEEED2") : Color.FromHex("#769656");
+
+            // Якщо клікнули на свою ж фігуру -> просто перемикаємо вибір
+            if (clickedSquare.Piece.Color == CurrentTurn)
             {
-                ResetSquareColor(SelectedSquare); // Скидаємо колір
-
-                // Якщо клікнули на свою ж фігуру - просто міняємо вибір
-                if (clickedSquare.Piece.Color == CurrentTurn)
-                {
-                    SelectedSquare = clickedSquare;
-                    SelectedSquare.SquareColor = Color.FromHex("#F6F669");
-                    return;
-                }
-
-                // ВАЛІДАЦІЯ ХОДУ (Тут буде головна логіка)
-                if (ChessRules.IsMoveValid(SelectedSquare, clickedSquare, Squares))
-                {
-                    MakeMove(SelectedSquare, clickedSquare);
-                    SwitchTurn();
-                }
-
-                SelectedSquare = null;
+                SelectedSquare = clickedSquare;
+                SelectedSquare.SquareColor = Color.FromHex("#F6F669");
+                return;
             }
+
+            // --- ГОЛОВНА ЛОГІКА ХОДУ ---
+            
+            // Передаємо EnPassantTarget у валідатор!
+            if (ChessRules.IsMoveValid(SelectedSquare, clickedSquare, Squares, EnPassantTarget))
+            {
+                // 1. Робимо хід (фізично переміщуємо, обробляємо En Passant)
+                MakeMove(SelectedSquare, clickedSquare);
+
+                // 2. ПЕРЕВІРКА НА ПЕРЕТВОРЕННЯ (Promotion)
+                // Якщо пішак дійшов до краю (0 для білих, 7 для чорних або навпаки, залежно від орієнтації)
+                if (clickedSquare.Piece.Type == PieceType.Pawn && (clickedSquare.Row == 0 || clickedSquare.Row == 7))
+                {
+                    // ❗ Чекаємо, поки користувач вибере фігуру
+                    await PromotePawn(clickedSquare);
+                }
+
+                // 3. Тільки ТЕПЕР передаємо хід
+                SwitchTurn();
+            }
+
+            SelectedSquare = null;
         }
+        // У ChessBoardViewModel.cs
 
         private void MakeMove(SquareModel from, SquareModel to)
         {
+            // --- 1. РОКИРОВКА (Castling) ---
+            if (from.Piece.Type == PieceType.King && Math.Abs(to.Column - from.Column) == 2)
+            {
+                int direction = to.Column - from.Column > 0 ? 1 : -1;
+                int rookOldCol = direction == 1 ? 7 : 0;
+                int rookNewCol = direction == 1 ? 5 : 3;
+                
+                var rookOldSq = Squares[from.Row * 8 + rookOldCol];
+                var rookNewSq = Squares[from.Row * 8 + rookNewCol];
+                
+                rookNewSq.Piece = rookOldSq.Piece;
+                rookOldSq.Piece = new PieceModel { Type = PieceType.None, Color = PieceColor.None };
+                rookNewSq.Piece.HasMoved = true;
+            }
+
+            // --- 2. EN PASSANT (ВЗЯТТЯ) ---
+            // Якщо пішак ходить по діагоналі на порожню клітинку -> це En Passant
+            if (from.Piece.Type == PieceType.Pawn && 
+                from.Column != to.Column && 
+                to.Piece.Type == PieceType.None)
+            {
+                // Ворог стоїть на тому ж рядку, звідки ми прийшли, але в колонці, куди ми йдемо
+                int enemyPawnRow = from.Row; 
+                int enemyPawnCol = to.Column;
+                
+                var enemyPawnSq = Squares[enemyPawnRow * 8 + enemyPawnCol];
+                
+                // З'їдаємо ворога
+                enemyPawnSq.Piece = new PieceModel { Type = PieceType.None, Color = PieceColor.None };
+            }
+
+            // --- 3. ФІЗИЧНИЙ ХІД ---
             to.Piece = from.Piece;
             from.Piece = new PieceModel { Type = PieceType.None, Color = PieceColor.None };
+            to.Piece.HasMoved = true;
+
+            // --- 4. ВСТАНОВЛЕННЯ НОВОЇ ЦІЛІ EN PASSANT ---
+            // Якщо пішак стрибнув на 2 клітинки -> запам'ятовуємо клітинку за ним
+            if (to.Piece.Type == PieceType.Pawn && Math.Abs(to.Row - from.Row) == 2)
+            {
+                int middleRow = (from.Row + to.Row) / 2;
+                EnPassantTarget = Squares[middleRow * 8 + from.Column];
+            }
+            else
+            {
+                // Будь-який інший хід скидає можливість En Passant
+                EnPassantTarget = null;
+            }
+            
+            // ❗ SwitchTurn тут НЕ ВИКЛИКАЄМО (як ти і зробив), бо ще може бути Promotion
+        }
+
+        private async Task PromotePawn(SquareModel square)
+        {
+            // Показуємо меню і чекаємо відповіді
+            string result = await Shell.Current.DisplayActionSheet(
+                "Оберіть фігуру:", null, null, 
+                "Ферзь", "Тура", "Слон", "Кінь");
+
+            // Якщо користувач скасував (клацнув поза меню), за замовчуванням Ферзь
+            if (result == null) result = "Ферзь";
+
+            PieceType newType = result switch
+            {
+                "Ферзь" => PieceType.Queen,
+                "Тура" => PieceType.Rook,
+                "Слон" => PieceType.Bishop,
+                "Кінь" => PieceType.Knight,
+                _ => PieceType.Queen
+            };
+
+            // Оновлюємо фігуру на дошці
+            square.Piece = new PieceModel 
+            { 
+                Type = newType, 
+                Color = square.Piece.Color, 
+                HasMoved = true 
+            };
         }
 
         private void SwitchTurn()

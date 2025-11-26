@@ -27,7 +27,7 @@
             <summary>The backing field for <see cref="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.HandleSquareClickCommand"/>.</summary>
         </member>
         <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.HandleSquareClickCommand">
-            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand`1"/> instance wrapping <see cref="M:ChessTrainerApp.ViewModels.ChessBoardViewModel.HandleSquareClick(ChessTrainerApp.Models.SquareModel)"/>.</summary>
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand`1"/> instance wrapping <see cref="M:ChessTrainerApp.ViewModels.ChessBoardViewModel.HandleSquareClick(ChessTrainerApp.Models.SquareModel)"/>.</summary>
         </member>
         <member name="T:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs">
             <summary>

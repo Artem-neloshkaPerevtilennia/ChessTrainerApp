@@ -7,6 +7,7 @@ namespace ChessTrainerApp.Models
     {
         public PieceType Type { get; set; }
         public PieceColor Color { get; set; }
+        public bool HasMoved { get; set; } = false;
 
         // Допоміжна властивість для відображення (наприклад, "WK" для Білого Короля)
         public string Symbol => $"{Color.ToString()[0]}{Type.ToString()[0]}"; 
