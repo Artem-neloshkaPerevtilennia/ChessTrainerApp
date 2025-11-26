@@ -6,13 +6,13 @@
 
     <Grid>
 
-        <!-- 🔹 Фон -->
+        <!-- Фонова картинка -->
         <Image Source="homepage.webp"
                Aspect="AspectFill"
                Opacity="0.60"
                ZIndex="0"/>
 
-        <!-- 🔹 Основний контент -->
+        <!-- Основний контент -->
         <Grid RowDefinitions="0.2*, 0.8*"
               ColumnDefinitions="0.5*, 3*, 0.5*"
               ZIndex="1">
@@ -23,7 +23,7 @@
                                  VerticalOptions="Center"
                                  HorizontalOptions="Fill">
 
-                <!-- 🔸 Блок "Я граю за" -->
+                <!-- Блок "Я граю за" -->
                 <VerticalStackLayout Spacing="10">
 
                     <Label Text="Я граю за"
@@ -52,7 +52,7 @@
                 </VerticalStackLayout>
 
 
-                <!-- 🔸 Блок "Складність" -->
+                <!-- Блок "Складність" -->
                 <VerticalStackLayout Spacing="5">
 
                     <Label Text="Складність"
@@ -88,7 +88,7 @@
                 </VerticalStackLayout>
 
 
-                <!-- 🔸 Блок "Режим гри" -->
+                <!-- Блок "Режим гри" -->
                 <VerticalStackLayout Spacing="5">
 
                     <Label Text="Режим"
@@ -124,7 +124,7 @@
                 </VerticalStackLayout>
 
 
-                <!-- 🟢 Кнопка старту гри -->
+                <!-- Кнопка старту гри -->
                 <Button Text="Почати гру!"
                         Style="{StaticResource HomePageBtn}"
                         HeightRequest="60"

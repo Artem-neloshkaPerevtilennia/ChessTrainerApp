@@ -20,12 +20,6 @@ namespace ChessTrainerApp.Models
                 if (Type == PieceType.None) return "";
 
                 // Базові коди Unicode для білих фігур
-                // ♔♕♖♗♘♙ (White)
-                // ♚♛♜♝♞♟ (Black)
-                
-                // Хитрість: Коди чорних фігур зміщені відносно білих на 6 позицій
-                // Білий Король = 2654 (hex), Чорний Король = 265A
-                
                 int baseCode = 0x2654; 
                 
                 // Зміщення для типу фігури

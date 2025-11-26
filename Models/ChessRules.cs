@@ -1,13 +1,13 @@
 using System.Collections.ObjectModel;
 
-namespace ChessTrainerApp.Models; // або Services
+namespace ChessTrainerApp.Models;
 
 public static class ChessRules
 {
-    // Додали необов'язковий параметр enPassantTarget
+    // перевірка чи можливий даний хід геометрично
     public static bool IsBasicMoveValid(SquareModel from, SquareModel to, ObservableCollection<SquareModel> board, SquareModel enPassantTarget = null)
     {
-        // 1. Не можна ходити на клітинку, зайняту своєю фігурою
+        // не можна ходити на клітинку, зайняту своєю фігурою
         if (to.Piece.Type != PieceType.None && to.Piece.Color == from.Piece.Color) return false;
 
         int dRow = to.Row - from.Row;
@@ -15,49 +15,43 @@ public static class ChessRules
 
         return from.Piece.Type switch
         {
-            // Передаємо enPassantTarget
             PieceType.Pawn => ValidatePawn(from, to, dRow, dCol, board, enPassantTarget),
-            
-            // Кінь залишається простим
             PieceType.Knight => ValidateKnight(dRow, dCol),
-            
-            // Тура, Слон, Ферзь залишаються як були
             PieceType.Rook => ValidateRook(from, to, board),
             PieceType.Bishop => ValidateBishop(from, to, board),
             PieceType.Queen => ValidateRook(from, to, board) || ValidateBishop(from, to, board),
-            
-            // Королю тепер потрібна дошка та координати для перевірки Рокировки
             PieceType.King => ValidateKing(from, to, board),
             
             _ => false
         };
     }
 
-    // 🐴 КІНЬ (Найпростіший)
+    // Кінь
     private static bool ValidateKnight(int dRow, int dCol)
     {
-        // Кінь ходить літерою "Г": 2 клітинки в один бік і 1 в інший
+        // кінь ходить на 2 клітинки в один бік і 1 в інший
         return (Math.Abs(dRow) == 2 && Math.Abs(dCol) == 1) || 
                (Math.Abs(dRow) == 1 && Math.Abs(dCol) == 2);
     }
 
-    // 👑 КОРОЛЬ
-    // метод для перевірки шляху рокировки
+    // Король
+    // перевірка рокировки
     private static bool CanCastle(SquareModel kingSquare, SquareModel destSquare, ObservableCollection<SquareModel> board)
     {
+        // якщо король вже ходив, то рокировка не є можливою
         if (kingSquare.Piece.HasMoved) return false;
 
-        // Визначаємо напрямок (вліво чи вправо)
+        // коротка чи довга рокировка
         int direction = destSquare.Column - kingSquare.Column > 0 ? 1 : -1; // 1 = Short (Kingside), -1 = Long (Queenside)
         
         // Шукаємо туру
         int rookCol = direction == 1 ? 7 : 0;
         var rookSquare = GetSquare(board, kingSquare.Row, rookCol);
         
+        // якщо тура ходила, то рокировка не є можливою
         if (rookSquare.Piece.Type != PieceType.Rook || rookSquare.Piece.HasMoved) return false;
 
         // Перевіряємо, чи пустий простір між королем і турою
-        // Для короткої рокировки: клітинки col 5 і 6. Для довгої: 1, 2, 3.
         int col = kingSquare.Column + direction;
         while (col != rookCol)
         {
@@ -65,16 +59,15 @@ public static class ChessRules
             col += direction;
         }
 
-        // ВАЖЛИВО: Не можна робити рокировку з-під шаху, через шах, або під шах.
-        // 1. Чи зараз шах?
+        // під шахом рокируватись не можна
         var enemyColor = kingSquare.Piece.Color == PieceColor.White ? PieceColor.Black : PieceColor.White;
         if (IsSquareUnderAttack(kingSquare, enemyColor, board)) return false;
 
-        // 2. Чи бите поле, через яке перестрибуємо?
+        // після рокировки тура не може бути під боєм
         var middleSquare = GetSquare(board, kingSquare.Row, kingSquare.Column + direction);
         if (IsSquareUnderAttack(middleSquare, enemyColor, board)) return false;
 
-        // (Кінцева клітинка перевіряється в IsMoveValid)
+        // Кінцева клітинка короля перевіряється в IsMoveValid
 
         return true;
     }
@@ -84,51 +77,45 @@ public static class ChessRules
         int dRow = to.Row - from.Row;
         int dCol = to.Column - from.Column;
 
-        // 1. Стандартний хід (на 1 клітинку в будь-який бік)
+        // звичайний хід на 1 клітинку
         if (Math.Abs(dRow) <= 1 && Math.Abs(dCol) <= 1)
-        {
-            return true; 
-        }
+            return true;
 
-        // 2. Рокировка (Тільки по горизонталі, рівно на 2 клітинки)
+        // рокировка
         if (dRow == 0 && Math.Abs(dCol) == 2)
-        {
             return CanCastle(from, to, board);
-        }
 
         return false;
     }
 
-    // ♟️ ПІШАК (Трохи складніше)
+    // пішак
     private static bool ValidatePawn(SquareModel from, SquareModel to, int dRow, int dCol, ObservableCollection<SquareModel> board, SquareModel enPassantTarget)
     {
         var direction = from.Piece.Color == PieceColor.White ? -1 : 1;
 
-        // 1. Звичайний хід вперед (на 1 клітинку)
+        // звичайний хід на 1 клітинку
         if (dCol == 0 && dRow == direction)
-        {
             return to.Piece.Type == PieceType.None;
-        }
 
-        // 2. Подвійний хід зі старту
+        // хід на 2 клітинки
         bool isStartRow = (from.Piece.Color == PieceColor.White && from.Row == 6) ||
                         (from.Piece.Color == PieceColor.Black && from.Row == 1);
 
         if (isStartRow && dCol == 0 && dRow == 2 * direction)
         {
-            // Перевіряємо проміжну клітинку
+            // перевіряємо наявність фігур посеред шляху
             var intermediateSquare = GetSquare(board, from.Row + direction, from.Column);
             return to.Piece.Type == PieceType.None && intermediateSquare.Piece.Type == PieceType.None;
         }
 
-        // 3. Взяття (по діагоналі)
+        // взяття іншої фігури пішаком
         if (Math.Abs(dCol) == 1 && dRow == direction)
         {
-            // Або там стоїть ворог...
+            // звичайне взяття
             if (to.Piece.Type != PieceType.None && to.Piece.Color != from.Piece.Color)
                 return true;
 
-            // ...АБО це клітинка En Passant (вона пуста, але ми можемо туди піти)
+            // взяття на проході
             if (to == enPassantTarget)
                 return true;
         }
@@ -136,8 +123,8 @@ public static class ChessRules
         return false;
     }
 
-    // Допоміжний метод для Важких фігур (Тура, Слон, Ферзь)
-    // Перевіряє, чи чистий шлях між точками
+    // далекобійні фігури
+    // чи чистий шлях між точками
     private static bool IsPathClear(SquareModel from, SquareModel to, ObservableCollection<SquareModel> board)
     {
         int dRow = Math.Sign(to.Row - from.Row); // -1, 0 або 1
@@ -157,6 +144,7 @@ public static class ChessRules
         return true;
     }
 
+    // тура
     private static bool ValidateRook(SquareModel from, SquareModel to, ObservableCollection<SquareModel> board)
     {
         // Тура ходить тільки прямо (змінюється або рядок, або стовпець, але не обидва)
@@ -164,6 +152,7 @@ public static class ChessRules
         return IsPathClear(from, to, board);
     }
 
+    // слон
     private static bool ValidateBishop(SquareModel from, SquareModel to, ObservableCollection<SquareModel> board)
     {
         // Слон ходить по діагоналі (зміна рядка дорівнює зміні стовпця)
@@ -171,15 +160,16 @@ public static class ChessRules
         return IsPathClear(from, to, board);
     }
 
-    // Допоміжний метод для пошуку клітинки в масиві
+    // для валідації ферзя можна використати методи для тури та слона разом
+
+    // допоміжний метод для пошуку клітинки в масиві
     private static SquareModel GetSquare(ObservableCollection<SquareModel> board, int row, int col)
     {
         // Оскільки це одновимірний масив 8x8, індекс = row * 8 + col
         return board[row * 8 + col];
     }
 
-    // У ChessTrainerApp.Models.ChessRules
-
+    // чи атакована клітина іншою фігурою
     public static bool IsSquareUnderAttack(SquareModel targetSquare, PieceColor attackerColor, ObservableCollection<SquareModel> board)
     {
         // Проходимо по всіх клітинках дошки
@@ -189,8 +179,6 @@ public static class ChessRules
             if (square.Piece.Type != PieceType.None && square.Piece.Color == attackerColor)
             {
                 // Перевіряємо, чи може ця фігура "з'їсти" фігуру на цільовій клітинці
-                // Важливо: тут ми викликаємо нашу базову логіку ходів (IsMoveValid)
-                // Але ми не передаємо 'checkKingSafety', щоб уникнути нескінченної рекурсії
                 if (IsBasicMoveValid(square, targetSquare, board)) 
                 {
                     return true;
@@ -200,12 +188,13 @@ public static class ChessRules
         return false;
     }
 
+    // остаточна перевірка валідності ходу
     public static bool IsMoveValid(SquareModel from, SquareModel to, ObservableCollection<SquareModel> board, SquareModel enPassantTarget = null)
     {
-        // 1. Спочатку перевіряємо базову геометрію (чи ходить так кінь/тура тощо)
+        // перевірка геометрії
         if (!IsBasicMoveValid(from, to, board, enPassantTarget)) return false;
 
-        // 2. СИМУЛЯЦІЯ ХОДУ для перевірки на Шах
+        // симуляцію ходу для перевірки на шах
         // Зберігаємо старі дані, щоб потім відкотити
         var originalPieceOnTo = to.Piece;
         var movingPiece = from.Piece;
@@ -215,14 +204,14 @@ public static class ChessRules
         to.Piece = movingPiece;
         from.Piece = new PieceModel { Type = PieceType.None, Color = PieceColor.None };
 
-        // 3. Знаходимо, де тепер МІЙ король
+        // знаходимо, де тепер король гравця, що походив
         var myKingSquare = FindKing(myColor, board);
 
-        // 4. Перевіряємо, чи він під атакою ворога
+        // перевірка чи він під атакою ворога
         var enemyColor = myColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
         bool isKingInCheck = IsSquareUnderAttack(myKingSquare, enemyColor, board);
 
-        // 5. ВІДКОЧУЄМО ЗМІНИ НАЗАД (Обов'язково!)
+        // відкочуємо зміни назад
         from.Piece = movingPiece;
         to.Piece = originalPieceOnTo;
 
@@ -230,32 +219,32 @@ public static class ChessRules
         return !isKingInCheck;
     }
 
-    // Допоміжний метод для пошуку короля
+    // пошук розташування короля
     private static SquareModel FindKing(PieceColor color, ObservableCollection<SquareModel> board)
     {
         return board.FirstOrDefault(s => s.Piece.Type == PieceType.King && s.Piece.Color == color);
     }
 
-
+    // чи є у гравця взагалі ходи
     public static bool HasAnyLegalMove(PieceColor color, ObservableCollection<SquareModel> board, SquareModel enPassantTarget)
     {
-        // 1. Знаходимо всі фігури гравця
+        // всі фігури гравця
         var myPiecesSquares = board.Where(s => s.Piece.Type != PieceType.None && s.Piece.Color == color).ToList();
 
-        // 2. Для кожної фігури...
+        // перебираємо всі фігури
         foreach (var fromSquare in myPiecesSquares)
         {
-            // 3. ...перебираємо всі клітинки дошки як потенційні цілі
+            // пошук потенційних клітинок для кожної фігури
             foreach (var toSquare in board)
             {
-                // Якщо хід легальний (це враховує і захист від шаху!)
+                // якщо хід легальний
                 if (IsMoveValid(fromSquare, toSquare, board, enPassantTarget))
                 {
-                    return true; // Знайшли хоча б один порятунок -> граємо далі
+                    return true;
                 }
             }
         }
 
-        return false; // Жодного ходу немає -> приїхали (Мат або Пат)
+        return false; // якщо ходів нема, то мат або пат
     }
 }
