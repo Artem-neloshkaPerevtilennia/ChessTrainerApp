@@ -7,6 +7,11 @@ namespace ChessTrainerApp.ViewModels
 {
     public partial class ChessBoardViewModel : ObservableObject
     {
+        // кольори клітинок
+        private readonly Color _lightSquareColor = Color.FromHex("#EEEED2");
+        private readonly Color _darkSquareColor = Color.FromHex("#769656");
+        private readonly Color _selectedSquareColor = Color.FromHex("#F6F669");
+
         // Колекція для відображення дошки (9x9)
         public ObservableCollection<SquareModel> Squares { get; }
 
@@ -33,8 +38,8 @@ namespace ChessTrainerApp.ViewModels
         {
             Squares.Clear();
             // кольори клітинок
-            Color lightSquare = Color.FromHex("#EEEED2");
-            Color darkSquare = Color.FromHex("#769656");
+            Color lightSquare = _lightSquareColor;
+            Color darkSquare = _darkSquareColor;
 
             // Ініціалізація 8x8 клітинок
             for (int r = 0; r < 8; r++)
@@ -59,42 +64,32 @@ namespace ChessTrainerApp.ViewModels
         // отримання фігури на клітинці на початку гри
         private PieceModel GetInitialPiece(int r, int c)
         {
-            PieceColor color = (r == 0 || r == 1) ? PieceColor.Black :
-                            (r == 6 || r == 7) ? PieceColor.White : PieceColor.None;
+            // Визначаємо колір
+            PieceColor color = PieceColor.None;
+            if (r == 0 || r == 1) color = PieceColor.Black;
+            else if (r == 6 || r == 7) color = PieceColor.White;
 
-            // якщо це 3-6 ряд, то фігури там нема
-            if (color == PieceColor.None)
+            if (color == PieceColor.None) 
                 return new PieceModel { Type = PieceType.None, Color = PieceColor.None };
 
+            // Визначаємо тип
             PieceType type = PieceType.None;
-            if (r == 1 || r == 6) // пішаки
-                type = PieceType.Pawn;
-            else if (r == 0 || r == 7) // легкі та важкі фігури з королем
+            
+            if (r == 1 || r == 6) type = PieceType.Pawn;
+            else
             {
-                switch (c)
+                // Ряд фігур (0 або 7)
+                type = c switch
                 {
-                    case 0:
-                    case 7:
-                        type = PieceType.Rook;
-                        break;
-                    case 1:
-                    case 6:
-                        type = PieceType.Knight;
-                        break;
-                    case 2:
-                    case 5:
-                        type = PieceType.Bishop;
-                        break;
-                    case 3:
-                        type = PieceType.Queen;
-                        break;
-                    case 4:
-                        type = PieceType.King;
-                        break;
-                }
+                    0 or 7 => PieceType.Rook,
+                    1 or 6 => PieceType.Knight,
+                    2 or 5 => PieceType.Bishop,
+                    3 => PieceType.Queen,
+                    4 => PieceType.King,
+                    _ => PieceType.None
+                };
             }
 
-            // встановлення відповідної іконки
             return new PieceModel { Type = type, Color = color };
         }
 
@@ -114,7 +109,7 @@ namespace ChessTrainerApp.ViewModels
                     clickedSquare.Piece.Color == CurrentTurn)
                 {
                     SelectedSquare = clickedSquare;
-                    SelectedSquare.SquareColor = Color.FromHex("#F6F669"); // виділення клітини фігури, яку обрано
+                    SelectedSquare.SquareColor = _selectedSquareColor; // виділення клітини фігури, яку обрано
                 }
                 return;
             }
@@ -122,14 +117,13 @@ namespace ChessTrainerApp.ViewModels
             // сценарій 2: спроба ходу
 
             // скидаємо колір виділення
-            bool isEven = (SelectedSquare.Row + SelectedSquare.Column) % 2 == 0;
-            SelectedSquare.SquareColor = isEven ? Color.FromHex("#EEEED2") : Color.FromHex("#769656");
+            ResetSquareColor(SelectedSquare);
 
             // якщо клікнули на свою ж фігуру, то просто перемикаємо вибір
             if (clickedSquare.Piece.Color == CurrentTurn)
             {
                 SelectedSquare = clickedSquare;
-                SelectedSquare.SquareColor = Color.FromHex("#F6F669");
+                SelectedSquare.SquareColor = _selectedSquareColor;
                 return;
             }
 
@@ -273,7 +267,7 @@ namespace ChessTrainerApp.ViewModels
             // Повертаємо оригінальний колір (зелений або кремовий)
             // Тобі треба буде винести логіку визначення кольору в окремий метод або зберігати оригінальний колір
             bool isEven = (square.Row + square.Column) % 2 == 0;
-            square.SquareColor = isEven ? Color.FromHex("#EEEED2") : Color.FromHex("#769656");
+            square.SquareColor = isEven ? _lightSquareColor : _darkSquareColor;
         }
     }
 }
