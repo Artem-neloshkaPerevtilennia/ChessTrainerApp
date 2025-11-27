@@ -5,7 +5,7 @@ namespace ChessTrainerApp.Models;
 public static class ChessRules
 {
     // перевірка чи можливий даний хід геометрично
-    public static bool IsBasicMoveValid(SquareModel from, SquareModel to, ObservableCollection<SquareModel> board, SquareModel enPassantTarget = null)
+    public static bool IsBasicMoveValid(SquareModel from, SquareModel to, IList<SquareModel> board, SquareModel enPassantTarget = null)
     {
         // не можна ходити на клітинку, зайняту своєю фігурою
         if (to.Piece.Type != PieceType.None && to.Piece.Color == from.Piece.Color) return false;
@@ -36,7 +36,7 @@ public static class ChessRules
 
     // Король
     // перевірка рокировки
-    private static bool CanCastle(SquareModel kingSquare, SquareModel destSquare, ObservableCollection<SquareModel> board)
+    private static bool CanCastle(SquareModel kingSquare, SquareModel destSquare, IList<SquareModel> board)
     {
         // якщо король вже ходив, то рокировка не є можливою
         if (kingSquare.Piece.HasMoved) return false;
@@ -72,7 +72,7 @@ public static class ChessRules
         return true;
     }
 
-    private static bool ValidateKing(SquareModel from, SquareModel to, ObservableCollection<SquareModel> board)
+    private static bool ValidateKing(SquareModel from, SquareModel to, IList<SquareModel> board)
     {
         int dRow = to.Row - from.Row;
         int dCol = to.Column - from.Column;
@@ -89,7 +89,7 @@ public static class ChessRules
     }
 
     // пішак
-    private static bool ValidatePawn(SquareModel from, SquareModel to, int dRow, int dCol, ObservableCollection<SquareModel> board, SquareModel enPassantTarget)
+    private static bool ValidatePawn(SquareModel from, SquareModel to, int dRow, int dCol, IList<SquareModel> board, SquareModel enPassantTarget)
     {
         var direction = from.Piece.Color == PieceColor.White ? -1 : 1;
 
@@ -125,7 +125,7 @@ public static class ChessRules
 
     // далекобійні фігури
     // чи чистий шлях між точками
-    private static bool IsPathClear(SquareModel from, SquareModel to, ObservableCollection<SquareModel> board)
+    private static bool IsPathClear(SquareModel from, SquareModel to, IList<SquareModel> board)
     {
         int dRow = Math.Sign(to.Row - from.Row); // -1, 0 або 1
         int dCol = Math.Sign(to.Column - from.Column);
@@ -145,7 +145,7 @@ public static class ChessRules
     }
 
     // тура
-    private static bool ValidateRook(SquareModel from, SquareModel to, ObservableCollection<SquareModel> board)
+    private static bool ValidateRook(SquareModel from, SquareModel to, IList<SquareModel> board)
     {
         // Тура ходить тільки прямо (змінюється або рядок, або стовпець, але не обидва)
         if (from.Row != to.Row && from.Column != to.Column) return false;
@@ -153,7 +153,7 @@ public static class ChessRules
     }
 
     // слон
-    private static bool ValidateBishop(SquareModel from, SquareModel to, ObservableCollection<SquareModel> board)
+    private static bool ValidateBishop(SquareModel from, SquareModel to, IList<SquareModel> board)
     {
         // Слон ходить по діагоналі (зміна рядка дорівнює зміні стовпця)
         if (Math.Abs(to.Row - from.Row) != Math.Abs(to.Column - from.Column)) return false;
@@ -163,14 +163,14 @@ public static class ChessRules
     // для валідації ферзя можна використати методи для тури та слона разом
 
     // допоміжний метод для пошуку клітинки в масиві
-    private static SquareModel GetSquare(ObservableCollection<SquareModel> board, int row, int col)
+    private static SquareModel GetSquare(IList<SquareModel> board, int row, int col)
     {
         // Оскільки це одновимірний масив 8x8, індекс = row * 8 + col
         return board[row * 8 + col];
     }
 
     // чи атакована клітина іншою фігурою
-    public static bool IsSquareUnderAttack(SquareModel targetSquare, PieceColor attackerColor, ObservableCollection<SquareModel> board)
+    public static bool IsSquareUnderAttack(SquareModel targetSquare, PieceColor attackerColor, IList<SquareModel> board)
     {
         // Проходимо по всіх клітинках дошки
         foreach (var square in board)
@@ -189,7 +189,7 @@ public static class ChessRules
     }
 
     // остаточна перевірка валідності ходу
-    public static bool IsMoveValid(SquareModel from, SquareModel to, ObservableCollection<SquareModel> board, SquareModel enPassantTarget = null)
+    public static bool IsMoveValid(SquareModel from, SquareModel to, IList<SquareModel> board, SquareModel enPassantTarget = null)
     {
         // перевірка геометрії
         if (!IsBasicMoveValid(from, to, board, enPassantTarget)) return false;
@@ -220,13 +220,13 @@ public static class ChessRules
     }
 
     // пошук розташування короля
-    private static SquareModel FindKing(PieceColor color, ObservableCollection<SquareModel> board)
+    private static SquareModel FindKing(PieceColor color, IList<SquareModel> board)
     {
         return board.FirstOrDefault(s => s.Piece.Type == PieceType.King && s.Piece.Color == color);
     }
 
     // чи є у гравця взагалі ходи
-    public static bool HasAnyLegalMove(PieceColor color, ObservableCollection<SquareModel> board, SquareModel enPassantTarget)
+    public static bool HasAnyLegalMove(PieceColor color, IList<SquareModel> board, SquareModel enPassantTarget)
     {
         // всі фігури гравця
         var myPiecesSquares = board.Where(s => s.Piece.Type != PieceType.None && s.Piece.Color == color).ToList();
@@ -246,5 +246,24 @@ public static class ChessRules
         }
 
         return false; // якщо ходів нема, то мат або пат
+    }
+
+    // всі можливі ходи (для ШІ)
+    public static List<Move> GetAllLegalMoves(PieceColor color, IList<SquareModel> board, SquareModel enPassantTarget)
+    {
+        var moves = new List<Move>();
+        var myPieces = board.Where(s => s.Piece.Type != PieceType.None && s.Piece.Color == color);
+
+        foreach (var fromSq in myPieces)
+        {
+            foreach (var toSq in board)
+            {
+                if (IsMoveValid(fromSq, toSq, board, enPassantTarget))
+                {
+                    moves.Add(new Move { From = fromSq, To = toSq });
+                }
+            }
+        }
+        return moves;
     }
 }

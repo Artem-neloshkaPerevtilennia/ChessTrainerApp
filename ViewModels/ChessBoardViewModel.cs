@@ -8,8 +8,11 @@ namespace ChessTrainerApp.ViewModels
     public partial class ChessBoardViewModel : ObservableObject
     {
         // кольори клітинок
+        [Obsolete]
         private readonly Color _lightSquareColor = Color.FromHex("#EEEED2");
+        [Obsolete]
         private readonly Color _darkSquareColor = Color.FromHex("#769656");
+        [Obsolete]
         private readonly Color _selectedSquareColor = Color.FromHex("#F6F669");
 
         // Колекція для відображення дошки (9x9)
@@ -51,7 +54,7 @@ namespace ChessTrainerApp.ViewModels
                         Row = r,
                         Column = c,
                         SquareColor = (r + c) % 2 == 0 ? lightSquare : darkSquare,
-                        Piece = GetInitialPiece(r, c)
+                        Piece = ChessBoardViewModel.GetInitialPiece(r, c)
                     };
                     Squares.Add(square);
                 }
@@ -62,7 +65,7 @@ namespace ChessTrainerApp.ViewModels
         public SquareModel EnPassantTarget { get; set; }
 
         // отримання фігури на клітинці на початку гри
-        private PieceModel GetInitialPiece(int r, int c)
+        private static PieceModel GetInitialPiece(int r, int c)
         {
             // Визначаємо колір
             PieceColor color = PieceColor.None;
@@ -230,7 +233,7 @@ namespace ChessTrainerApp.ViewModels
         }
 
         // передача ходу
-        private void SwitchTurn()
+        private async Task SwitchTurn()
         {
             // Змінюємо гравця
             CurrentTurn = CurrentTurn == PieceColor.White ? PieceColor.Black : PieceColor.White;
@@ -260,6 +263,10 @@ namespace ChessTrainerApp.ViewModels
                 IsGameOver = true;
                 // Тут можна викликати метод збереження гри в майбутньому
             }
+
+            // перевірка чи зараз хід бота (поки що просто чорних)
+            if (!IsGameOver && CurrentTurn == PieceColor.Black)
+                await BotTurn();
         }
 
         private void ResetSquareColor(SquareModel square)
@@ -268,6 +275,78 @@ namespace ChessTrainerApp.ViewModels
             // Тобі треба буде винести логіку визначення кольору в окремий метод або зберігати оригінальний колір
             bool isEven = (square.Row + square.Column) % 2 == 0;
             square.SquareColor = isEven ? _lightSquareColor : _darkSquareColor;
+        }
+    
+        // хід бота
+        private async Task BotTurn()
+        {
+            if (GameStatus != GameStatus.InProgress) return;
+
+            // 1. Пауза для ефекту "думки" (тут UI не блокується)
+            await Task.Delay(500);
+
+            // 2. Створюємо копію дошки ТУТ (у головному потоці)
+            var boardClone = GetBoardClone();
+            
+            // Клонуємо ціль En Passant, якщо вона є
+            SquareModel enPassantClone = null;
+            if (EnPassantTarget != null)
+            {
+                enPassantClone = boardClone.FirstOrDefault(s => s.Row == EnPassantTarget.Row && s.Column == EnPassantTarget.Column);
+            }
+
+            // 3. Запускаємо важкі розрахунки на копії (у фоновому потоці)
+            var bestMoveClone = await Task.Run(() => 
+            {
+                // Передаємо КЛОН. Зміни тут не вплинуть на UI.
+                return ChessAI.GetBestMove(boardClone, CurrentTurn, 2, enPassantClone);
+            });
+
+            // 4. Застосовуємо результат на РЕАЛЬНІЙ дошці
+            if (bestMoveClone.HasValue)
+            {
+                // Знаходимо реальні клітинки, що відповідають клонованим
+                var realFrom = Squares.First(s => s.Row == bestMoveClone.Value.From.Row && s.Column == bestMoveClone.Value.From.Column);
+                var realTo = Squares.First(s => s.Row == bestMoveClone.Value.To.Row && s.Column == bestMoveClone.Value.To.Column);
+
+                MakeMove(realFrom, realTo);
+                
+                // Авто-перетворення пішака для бота
+                if (realTo.Piece.Type == PieceType.Pawn && (realTo.Row == 0 || realTo.Row == 7))
+                {
+                    realTo.Piece = new PieceModel { Type = PieceType.Queen, Color = CurrentTurn, HasMoved = true };
+                }
+
+                SwitchTurn();
+            }
+            else
+            {
+                // Пат або Мат (обробить SwitchTurn)
+                SwitchTurn(); 
+            }
+        }
+        
+        // клонування дошки для розрахунків
+        private List<SquareModel> GetBoardClone()
+        {
+            var clone = new List<SquareModel>();
+            
+            foreach (var square in Squares)
+            {
+                clone.Add(new SquareModel
+                {
+                    Row = square.Row,
+                    Column = square.Column,
+                    SquareColor = square.SquareColor, // Це не важливо для ШІ, але хай буде
+                    Piece = new PieceModel 
+                    { 
+                        Type = square.Piece.Type, 
+                        Color = square.Piece.Color, 
+                        HasMoved = square.Piece.HasMoved 
+                    }
+                });
+            }
+            return clone;
         }
     }
 }

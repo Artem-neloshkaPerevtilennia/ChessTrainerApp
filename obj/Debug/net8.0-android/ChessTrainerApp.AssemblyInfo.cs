@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ChessTrainerApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+4ccb577e9619365855b37664a4470a4e977de20c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+889b4c08751b4264f877341b782c4949cef7250c")]
 [assembly: System.Reflection.AssemblyProductAttribute("ChessTrainerApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ChessTrainerApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
