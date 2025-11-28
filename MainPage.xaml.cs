@@ -14,7 +14,7 @@ public partial class MainPage : ContentPage
 
 	private async void OnGoToArchievePage(object sender, EventArgs e)
 	{
-		await Navigation.PushAsync(new ArchievePage());
+		await Navigation.PushAsync(new ArchivePage());
 	}
 
 	private async void OnGoToSettingsPage(object sender, EventArgs e)

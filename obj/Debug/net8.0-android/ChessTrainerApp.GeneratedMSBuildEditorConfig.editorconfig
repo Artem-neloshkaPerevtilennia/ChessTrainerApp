@@ -33,11 +33,11 @@ build_metadata.AdditionalFiles.ManifestResourceName = ChessTrainerApp.AppShell.x
 build_metadata.AdditionalFiles.TargetPath = AppShell.xaml
 build_metadata.AdditionalFiles.RelativePath = AppShell.xaml
 
-[C:/GitHub/ChessTrainerApp/Archieve.xaml]
+[C:/GitHub/ChessTrainerApp/ArchivePage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
-build_metadata.AdditionalFiles.ManifestResourceName = ChessTrainerApp.Archieve.xaml
-build_metadata.AdditionalFiles.TargetPath = Archieve.xaml
-build_metadata.AdditionalFiles.RelativePath = Archieve.xaml
+build_metadata.AdditionalFiles.ManifestResourceName = ChessTrainerApp.ArchivePage.xaml
+build_metadata.AdditionalFiles.TargetPath = ArchivePage.xaml
+build_metadata.AdditionalFiles.RelativePath = ArchivePage.xaml
 
 [C:/GitHub/ChessTrainerApp/ChessBoardPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml

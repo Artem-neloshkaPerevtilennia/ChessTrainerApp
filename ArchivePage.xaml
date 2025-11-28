@@ -1,0 +1,55 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:ChessTrainerApp.ViewModels"
+             xmlns:m="clr-namespace:ChessTrainerApp.Models"
+             x:Class="ChessTrainerApp.ArchivePage"
+             Title="Архів Партій"
+             BackgroundColor="#303030">
+    
+    <ContentPage.BindingContext>
+        <vm:ArchiveViewModel />
+    </ContentPage.BindingContext>
+
+    <Grid RowDefinitions="Auto, *">
+        <Label Text="Історія Ігор" 
+               TextColor="White" FontSize="24" FontAttributes="Bold"
+               HorizontalOptions="Center" Margin="10"/>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Games}" Margin="10">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="m:GameRecord">
+                    
+                    <Frame BackgroundColor="#505050" CornerRadius="10" Margin="0,5" Padding="10">
+                        <StackLayout>
+                            <Grid ColumnDefinitions="*, Auto">
+                                <Label Text="{Binding DatePlayed, StringFormat='{0:dd.MM.yyyy HH:mm}'}" 
+                                       TextColor="LightGray" FontSize="12"/>
+                                
+                                <Label Text="{Binding Winner, StringFormat='Перемога: {0}'}" 
+                                       TextColor="Gold" FontAttributes="Bold" 
+                                       Grid.Column="1"/>
+                            </Grid>
+
+                            <Label Text="{Binding WhitePlayer, StringFormat='Білі: {0}'}" TextColor="White"/>
+                            <Label Text="{Binding BlackPlayer, StringFormat='Чорні: {0}'}" TextColor="White"/>
+                            
+                            <Label Text="{Binding PGN}" 
+                                   TextColor="#AAAAAA" 
+                                   LineBreakMode="TailTruncation" 
+                                   MaxLines="2" 
+                                   FontSize="10" Margin="0,5,0,0"/>
+                        </StackLayout>
+                    </Frame>
+                    
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            
+            <CollectionView.EmptyView>
+                <Label Text="Поки що немає зіграних партій..." 
+                       TextColor="Gray" 
+                       HorizontalOptions="Center" 
+                       VerticalOptions="Center"/>
+            </CollectionView.EmptyView>
+        </CollectionView>
+    </Grid>
+</ContentPage>

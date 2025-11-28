@@ -1,0 +1,25 @@
+using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using ChessTrainerApp.Models;
+using ChessTrainerApp.Services;
+
+namespace ChessTrainerApp.ViewModels;
+
+public partial class ArchiveViewModel : ObservableObject
+{
+    // Колекція, яка автоматично оновлює список у XAML
+    public ObservableCollection<GameRecord> Games { get; } = new();
+
+    public async Task LoadGames()
+    {
+        // 1. Отримуємо дані з бази
+        var gamesList = await DatabaseService.GetAllGamesAsync();
+
+        // 2. Чистимо старий список і додаємо нові дані
+        Games.Clear();
+        foreach (var game in gamesList)
+        {
+            Games.Add(game);
+        }
+    }
+}

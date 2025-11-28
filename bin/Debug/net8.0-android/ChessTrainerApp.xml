@@ -29,6 +29,9 @@
         <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.IsGameOver">
             <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.isGameOver"/>
         </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.PgnText">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.pgnText"/>
+        </member>
         <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.CurrentTurn">
             <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.currentTurn"/>
         </member>
@@ -62,6 +65,9 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsGameOver">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsGameOver" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.PgnText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "PgnText" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.CurrentTurn">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "CurrentTurn" generated properties.</summary>
         </member>
@@ -88,6 +94,9 @@
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsGameOver">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsGameOver" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.PgnText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "PgnText" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.CurrentTurn">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "CurrentTurn" generated properties.</summary>

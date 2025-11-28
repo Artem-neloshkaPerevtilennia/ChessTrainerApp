@@ -30,6 +30,19 @@ namespace ChessTrainerApp.ViewModels
         [ObservableProperty]
         private bool isGameOver = false;
 
+        // запис партії, що відображатиметься під дошкою
+        [ObservableProperty]
+        private string pgnText = "";
+        
+        // ходи у партії
+        public List<string> MoveHistory { get; set; } = new List<string>();
+
+        // клітина позаду пішака, що пішок на 2 клітини
+        public SquareModel EnPassantTarget { get; set; }
+
+        [ObservableProperty]
+        private PieceColor currentTurn = PieceColor.White;
+
         public ChessBoardViewModel()
         {
             Squares = new ObservableCollection<SquareModel>();
@@ -60,9 +73,6 @@ namespace ChessTrainerApp.ViewModels
                 }
             }
         }
-
-        // клітина позаду пішака, що пішок на 2 клітини
-        public SquareModel EnPassantTarget { get; set; }
 
         // отримання фігури на клітинці на початку гри
         private static PieceModel GetInitialPiece(int r, int c)
@@ -95,9 +105,6 @@ namespace ChessTrainerApp.ViewModels
 
             return new PieceModel { Type = type, Color = color };
         }
-
-        [ObservableProperty]
-        private PieceColor currentTurn = PieceColor.White;
 
         // натискання на клітинку
         [RelayCommand]
@@ -153,6 +160,9 @@ namespace ChessTrainerApp.ViewModels
         // виконання ходу
         private void MakeMove(SquareModel from, SquareModel to)
         {
+            // запис ходу
+            RecordMove(from, to);
+
             // рокировка
             if (from.Piece.Type == PieceType.King && Math.Abs(to.Column - from.Column) == 2)
             {
@@ -261,7 +271,24 @@ namespace ChessTrainerApp.ViewModels
                 }
 
                 IsGameOver = true;
-                // Тут можна викликати метод збереження гри в майбутньому
+
+                // збереження гри
+                if (isCheck)
+                {
+                    GameStatus = GameStatus.Checkmate;
+                    GameOverMessage = $"МАТ! Перемогли {enemyColor}";
+                    
+                    // --- ЗБЕРЕЖЕННЯ ---
+                    SaveGameResult(enemyColor.ToString()); 
+                }
+                else
+                {
+                    GameStatus = GameStatus.Stalemate;
+                    GameOverMessage = "ПАТ! Нічия.";
+                    
+                    // --- ЗБЕРЕЖЕННЯ ---
+                    SaveGameResult("Draw");
+                }
             }
 
             // перевірка чи зараз хід бота (поки що просто чорних)
@@ -347,6 +374,79 @@ namespace ChessTrainerApp.ViewModels
                 });
             }
             return clone;
+        }
+
+        // метод запису ходу
+        private void RecordMove(SquareModel from, SquareModel to)
+        {
+            // нотація фігури (пішака прийнято не записувати)
+            string pieceNotation = "";
+            if (from.Piece.Type != PieceType.Pawn)
+            {
+                pieceNotation = from.Piece.Type switch
+                {
+                    PieceType.Knight => "N",
+                    PieceType.Bishop => "B",
+                    PieceType.Rook => "R",
+                    PieceType.Queen => "Q",
+                    PieceType.King => "K",
+                    _ => ""
+                };
+            }
+
+            string captureNotation = "";
+            if (to.Piece.Type != PieceType.None || (from.Piece.Type == PieceType.Pawn && from.Column != to.Column))
+            {
+                if (from.Piece.Type == PieceType.Pawn)
+                    captureNotation = $"{(char)('a' + from.Column)}x";
+                else
+                    captureNotation = "x";
+            }
+
+            string destination = $"{(char)('a' + to.Column)}{8 - to.Row}";
+            string pgnMove = ""; // 
+
+            // Рокировка (спеціальний випадок)
+            if (from.Piece.Type == PieceType.King && Math.Abs(to.Column - from.Column) == 2)
+            {
+                pgnMove = (to.Column > from.Column) ? "O-O" : "O-O-O";
+            }
+            else
+            {
+                pgnMove = $"{pieceNotation}{captureNotation}{destination}";
+            }
+            
+            // Якщо зараз ходять білі - додаємо номер ходу
+            if (CurrentTurn == PieceColor.White)
+            {
+                int moveNumber = (MoveHistory.Count / 2) + 1;
+                PgnText += $"{moveNumber}. {pgnMove} ";
+            }
+            // Якщо зараз ходять чорні - просто додаємо хід
+            else
+            {
+                PgnText += $"{pgnMove} ";
+            }
+
+            // Додаємо в список (для внутрішньої логіки)
+            MoveHistory.Add(pgnMove);
+        }
+    
+        // збереження гри
+        private async void SaveGameResult(string winner)
+        {
+            string pgnString = PgnText; 
+
+            var record = new GameRecord
+            {
+                DatePlayed = DateTime.Now,
+                WhitePlayer = "User",
+                BlackPlayer = "Bot",
+                Winner = winner,
+                PGN = pgnString
+            };
+
+            await Services.DatabaseService.AddGameAsync(record);
         }
     }
 }
