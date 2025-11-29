@@ -26,10 +26,10 @@ public partial class PlayViewModel : ObservableObject
         // 1. Визначаємо глибину ШІ
         int depth = SelectedDifficultyIndex switch
         {
-            0 => 1, // Легка
-            1 => 2, // Середня
-            2 => 3, // Важка
-            _ => 2
+            0 => 2, // Легка
+            1 => 3, // Середня
+            2 => 4, // Важка
+            _ => 3
         };
 
         // 2. Визначаємо колір

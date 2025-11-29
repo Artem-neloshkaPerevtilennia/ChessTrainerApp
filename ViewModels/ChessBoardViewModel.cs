@@ -43,7 +43,7 @@ namespace ChessTrainerApp.ViewModels
         [ObservableProperty]
         private PieceColor currentTurn = PieceColor.White;
 
-        private int _aiDepth = 2;
+        private int _aiDepth = 3;
 
         [ObservableProperty]
         private PieceColor botColor;
