@@ -14,71 +14,84 @@
         <conv:PieceColorToMauiColorConverter x:Key="PieceColorConverter" />
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="*,8*,*" 
+    <Grid RowDefinitions="*,8*,2.5*" 
           ColumnDefinitions="*,8*,*"
-          VerticalOptions="Center" 
-          HorizontalOptions="Center">
+          VerticalOptions="Fill" 
+          HorizontalOptions="Fill">
 
         <Grid Grid.Row="1" Grid.Column="1"
-      ColumnDefinitions="*,*,*,*,*,*,*,*"
-      RowDefinitions="*,*,*,*,*,*,*,*"
-      
-      WidthRequest="350"     
-      HeightRequest="350"
-      
-      BackgroundColor="Red" 
-      
-      BindableLayout.ItemsSource="{Binding Squares}"> <BindableLayout.ItemTemplate>
+              ColumnDefinitions="*,*,*,*,*,*,*,*"
+              RowDefinitions="*,*,*,*,*,*,*,*"
+              WidthRequest="350"     
+              HeightRequest="350"
+              BackgroundColor="Transparent" 
+              BindableLayout.ItemsSource="{Binding Squares}">
+              
+            <BindableLayout.ItemTemplate>
                 <DataTemplate x:DataType="m:SquareModel">
                     <Grid Grid.Row="{Binding Row}" Grid.Column="{Binding Column}"
-                        BackgroundColor="{Binding SquareColor}">
+                          BackgroundColor="{Binding SquareColor}">
                         
                         <Grid.GestureRecognizers>
                             <TapGestureRecognizer 
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ChessBoardViewModel}}, Path=HandleSquareClickCommand}"
                                 CommandParameter="{Binding .}" />
                         </Grid.GestureRecognizers>
-                        <Label  Text="{Binding Piece.DisplayValue}" 
-                                FontSize="55"
-                                FontAttributes="Bold"
-                                HorizontalOptions="Center" 
-                                VerticalOptions="Center"
-                                TextColor="{Binding Piece.Color, Converter={StaticResource PieceColorConverter}}"
-                                InputTransparent="True"/>
+                        
+                        <Label Text="{Binding Piece.DisplayValue}" 
+                               FontSize="55"
+                               FontAttributes="Bold"
+                               HorizontalOptions="Center" 
+                               VerticalOptions="Center"
+                               TextColor="{Binding Piece.Color, Converter={StaticResource PieceColorConverter}}"
+                               InputTransparent="True"/>
                     </Grid>
                 </DataTemplate>
             </BindableLayout.ItemTemplate>
         </Grid>
 
-        <Frame Grid.Row="2" Grid.Column="1"
-            BackgroundColor="#404040" 
-            CornerRadius="10" 
-            Padding="10" 
-            Margin="0,10,0,20"
-            BorderColor="Gray">
+        <VerticalStackLayout Grid.Row="2" Grid.Column="1" Margin="0,10,0,20">
 
-            <ScrollView>
-                <Label Text="{Binding PgnText}" 
-                    TextColor="White" 
-                    FontSize="16"
-                    LineBreakMode="WordWrap"/> </ScrollView>
-        </Frame>
+            <Grid ColumnDefinitions="*, *" ColumnSpacing="10" Margin="0,0,0,5">
+                <Button Grid.Column="0" 
+                        Text="🠔 Назад" 
+                        Command="{Binding PreviousMoveCommand}"
+                        BackgroundColor="#505050" TextColor="White"/>
+                
+                <Button Grid.Column="1" 
+                        Text="Вперед 6" 
+                        Command="{Binding NextMoveCommand}"
+                        BackgroundColor="#505050" TextColor="White"/>
+            </Grid>
+
+            <Frame BackgroundColor="#404040" 
+                   CornerRadius="10" 
+                   Padding="10" 
+                   BorderColor="Gray"
+                   VerticalOptions="FillAndExpand"> <ScrollView>
+                    <Label Text="{Binding PgnText}" 
+                           TextColor="White" 
+                           FontSize="16"
+                           LineBreakMode="WordWrap"/>
+                </ScrollView>
+            </Frame>
+        </VerticalStackLayout>
 
         <BoxView Color="Black" Opacity="0.7" 
-            IsVisible="{Binding IsGameOver}" 
-            Grid.RowSpan="3" Grid.ColumnSpan="3"/>
+                 IsVisible="{Binding IsGameOver}" 
+                 Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Grid.ColumnSpan="3"/>
 
-        <VerticalStackLayout Grid.Row="1" Grid.Column="1" 
-                            VerticalOptions="Center" HorizontalOptions="Center"
-                            Spacing="20"
-                            IsVisible="{Binding IsGameOver}">
+        <VerticalStackLayout Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" Grid.ColumnSpan="3"
+                             VerticalOptions="Center" HorizontalOptions="Center"
+                             Spacing="20"
+                             IsVisible="{Binding IsGameOver}">
             
             <Label Text="{Binding GameOverMessage}" 
-                TextColor="White" FontSize="30" FontAttributes="Bold" 
-                HorizontalTextAlignment="Center"/>
+                   TextColor="White" FontSize="30" FontAttributes="Bold" 
+                   HorizontalTextAlignment="Center"/>
 
             <Button Text="Нова Гра" Command="{Binding RestartGameCommand}" 
-                    BackgroundColor="Green" TextColor="White"/>
+                    BackgroundColor="Green" TextColor="White" WidthRequest="200" HeightRequest="50"/>
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

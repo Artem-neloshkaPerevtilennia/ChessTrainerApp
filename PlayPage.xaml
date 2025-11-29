@@ -1,141 +1,107 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:ChessTrainerApp.ViewModels"
+             xmlns:conv="clr-namespace:ChessTrainerApp.Converters"
              x:Class="ChessTrainerApp.PlayPage"
-             Title="Play a game">
+             Title="Налаштування гри">
+
+    <ContentPage.BindingContext>
+        <vm:PlayViewModel />
+    </ContentPage.BindingContext>
+
+    <ContentPage.Resources>
+        <conv:SelectionToBorderColorConverter x:Key="SelectionConverter" />
+    </ContentPage.Resources>
 
     <Grid>
+        <Image Source="homepage.webp" Aspect="AspectFill" Opacity="0.60" ZIndex="0"/>
 
-        <!-- Фонова картинка -->
-        <Image Source="homepage.webp"
-               Aspect="AspectFill"
-               Opacity="0.60"
-               ZIndex="0"/>
+        <Grid RowDefinitions="0.2*, 0.8*" ColumnDefinitions="0.5*, 3*, 0.5*" ZIndex="1">
 
-        <!-- Основний контент -->
-        <Grid RowDefinitions="0.2*, 0.8*"
-              ColumnDefinitions="0.5*, 3*, 0.5*"
-              ZIndex="1">
+            <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="30"
+                                 VerticalOptions="Center" HorizontalOptions="Fill">
 
-            <VerticalStackLayout Grid.Row="1"
-                                 Grid.Column="1"
-                                 Spacing="25"
-                                 VerticalOptions="Center"
-                                 HorizontalOptions="Fill">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Я граю за" FontSize="22" TextColor="White" 
+                           HorizontalTextAlignment="Center" FontAttributes="Bold"/>
 
-                <!-- Блок "Я граю за" -->
-                <VerticalStackLayout Spacing="10">
+                    <HorizontalStackLayout Spacing="20" HorizontalOptions="Center">
+                        
+                        <Border Stroke="{Binding SelectedColorSide, Converter={StaticResource SelectionConverter}, ConverterParameter='White'}"
+                                StrokeThickness="3" BackgroundColor="#80000000"
+                                HeightRequest="80" WidthRequest="80" StrokeShape="RoundRectangle 10">
+                            <Label Text="♔" FontSize="50" TextColor="White" 
+                                   HorizontalOptions="Center" VerticalOptions="Center"/>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectSideCommand}" CommandParameter="White"/>
+                            </Border.GestureRecognizers>
+                        </Border>
 
-                    <Label Text="Я граю за"
-                           FontSize="22"
-                           TextColor="White"
-                           BackgroundColor="#80000000"
-                           HorizontalTextAlignment="Center"
-                           VerticalTextAlignment="Center" />
+                        <Border Stroke="{Binding SelectedColorSide, Converter={StaticResource SelectionConverter}, ConverterParameter='Random'}"
+                                StrokeThickness="3" BackgroundColor="#80000000"
+                                HeightRequest="80" WidthRequest="80" StrokeShape="RoundRectangle 10">
+                            <Label Text="☯" FontSize="50" TextColor="Gray" 
+                                   HorizontalOptions="Center" VerticalOptions="Center"/>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectSideCommand}" CommandParameter="Random"/>
+                            </Border.GestureRecognizers>
+                        </Border>
 
-                    <HorizontalStackLayout Spacing="25"
-                                           HorizontalOptions="Center">
+                        <Border Stroke="{Binding SelectedColorSide, Converter={StaticResource SelectionConverter}, ConverterParameter='Black'}"
+                                StrokeThickness="3" BackgroundColor="#80000000"
+                                HeightRequest="80" WidthRequest="80" StrokeShape="RoundRectangle 10">
+                            <Label Text="♚" FontSize="50" TextColor="Black" 
+                                   HorizontalOptions="Center" VerticalOptions="Center"/>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectSideCommand}" CommandParameter="Black"/>
+                            </Border.GestureRecognizers>
+                        </Border>
 
-                        <ImageButton Source="dotnet_bot.png"
-                                     WidthRequest="80"
-                                     HeightRequest="80"
-                                     BackgroundColor="#00000030"
-                                     CornerRadius="20"/>
-
-                        <ImageButton Source="homepage.png"
-                                     WidthRequest="80"
-                                     HeightRequest="80"
-                                     BackgroundColor="#00000030"
-                                     CornerRadius="20"/>
                     </HorizontalStackLayout>
-
                 </VerticalStackLayout>
 
 
-                <!-- Блок "Складність" -->
-                <VerticalStackLayout Spacing="5">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Складність" FontSize="22" TextColor="White" 
+                           HorizontalTextAlignment="Center" FontAttributes="Bold"/>
 
-                    <Label Text="Складність"
-                           FontSize="22"
-                           TextColor="White"
-                           BackgroundColor="#80000000"
-                           HorizontalTextAlignment="Center"
-                           VerticalTextAlignment="Center" />
-
-                    <Frame BackgroundColor="#80000060"
-                           CornerRadius="12"
-                           Padding="5"
-                           BorderColor="White"
-                           HorizontalOptions="Center">
-
-                        <Picker x:Name="DifficultyPicker"
-                                Title="Оберіть складність"
-                                FontSize="20"
-                                TextColor="White"
-                                TitleColor="#CCCCCC"
-                                WidthRequest="240">
-
+                    <Frame BackgroundColor="#80000000" CornerRadius="15" BorderColor="Gray" Padding="0">
+                        <Picker SelectedIndex="{Binding SelectedDifficultyIndex}"
+                                TextColor="White" TitleColor="Gray"
+                                HorizontalTextAlignment="Center" FontSize="18">
                             <Picker.Items>
-                                <x:String>Легка</x:String>
-                                <x:String>Середня</x:String>
-                                <x:String>Важка</x:String>
+                                <x:String>Легка (1 хід)</x:String>
+                                <x:String>Середня (2 ходи)</x:String>
+                                <x:String>Важка (3 ходи)</x:String>
                             </Picker.Items>
-
                         </Picker>
-
                     </Frame>
-
                 </VerticalStackLayout>
 
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Режим" FontSize="22" TextColor="White" 
+                           HorizontalTextAlignment="Center" FontAttributes="Bold"/>
 
-                <!-- Блок "Режим гри" -->
-                <VerticalStackLayout Spacing="5">
-
-                    <Label Text="Режим"
-                           FontSize="22"
-                           TextColor="White"
-                           BackgroundColor="#80000000"
-                           HorizontalTextAlignment="Center"
-                           VerticalTextAlignment="Center" />
-
-                    <Frame BackgroundColor="#80000060"
-                           CornerRadius="12"
-                           Padding="5"
-                           BorderColor="White"
-                           HorizontalOptions="Center">
-
-                        <Picker x:Name="GameModePicker"
-                                Title="Оберіть режим"
-                                FontSize="20"
-                                TextColor="White"
-                                TitleColor="#CCCCCC"
-                                WidthRequest="240">
-
+                    <Frame BackgroundColor="#80000000" CornerRadius="15" BorderColor="Gray" Padding="0">
+                        <Picker Title="Оберіть режим" SelectedIndex="0"
+                                TextColor="White" TitleColor="Gray"
+                                HorizontalTextAlignment="Center" FontSize="18">
                             <Picker.Items>
                                 <x:String>Навчальний</x:String>
-                                <x:String>Дослідник</x:String>
-                                <x:String>Виклик</x:String>
+                                <x:String>Турнірний</x:String>
                             </Picker.Items>
-
                         </Picker>
-
                     </Frame>
-
                 </VerticalStackLayout>
 
-
-                <!-- Кнопка старту гри -->
-                <Button Text="Почати гру!"
-                        Style="{StaticResource HomePageBtn}"
-                        HeightRequest="60"
-                        CornerRadius="15"
-                        BackgroundColor="Green"
-                        Clicked="OnStartGame"/>
+                <Button Text="Почати гру!" 
+                        Command="{Binding StartGameCommand}"
+                        BackgroundColor="#769656" TextColor="White"
+                        HeightRequest="60" CornerRadius="30"
+                        FontSize="20" FontAttributes="Bold"
+                        Margin="0,20,0,0"/>
 
             </VerticalStackLayout>
-
         </Grid>
-
     </Grid>
-
 </ContentPage>

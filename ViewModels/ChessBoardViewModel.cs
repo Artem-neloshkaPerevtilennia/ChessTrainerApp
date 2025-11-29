@@ -43,9 +43,28 @@ namespace ChessTrainerApp.ViewModels
         [ObservableProperty]
         private PieceColor currentTurn = PieceColor.White;
 
+        private int _aiDepth = 2;
+
+        [ObservableProperty]
+        private PieceColor botColor;
+
+        // Історія станів дошки
+        private List<GameState> _history = new List<GameState>();
+        private int _currentMoveIndex = -1; // -1 означає, що гра ще не почалась
+
+        // Команди для кнопок
+        public RelayCommand PreviousMoveCommand { get; }
+        public RelayCommand NextMoveCommand { get; }
+
+        // --- У КОНСТРУКТОРІ ---
         public ChessBoardViewModel()
         {
             Squares = new ObservableCollection<SquareModel>();
+            
+            // Ініціалізація команд
+            PreviousMoveCommand = new RelayCommand(GoToPreviousMove);
+            NextMoveCommand = new RelayCommand(GoToNextMove);
+
             InitializeBoard();
         }
 
@@ -72,6 +91,15 @@ namespace ChessTrainerApp.ViewModels
                     Squares.Add(square);
                 }
             }
+
+            // Очищаємо історію при новій грі
+            _history.Clear();
+            _currentMoveIndex = -1;
+            PgnText = "";
+            MoveHistory.Clear();
+            
+            // Зберігаємо початковий стан (хід 0)
+            SaveState();
         }
 
         // отримання фігури на клітинці на початку гри
@@ -111,6 +139,9 @@ namespace ChessTrainerApp.ViewModels
         private async Task HandleSquareClick(SquareModel clickedSquare)
         {
             if (GameStatus != GameStatus.InProgress) return;
+
+            // Якщо зараз хід Бота - ігноруємо кліки людини
+            if (CurrentTurn == BotColor) return;
 
             // сценарій 1: вибір фігури
             if (SelectedSquare == null)
@@ -248,6 +279,8 @@ namespace ChessTrainerApp.ViewModels
             // Змінюємо гравця
             CurrentTurn = CurrentTurn == PieceColor.White ? PieceColor.Black : PieceColor.White;
 
+            SaveState();
+
             // чи є у нового гравця ходи?
             bool hasMoves = ChessRules.HasAnyLegalMove(CurrentTurn, Squares, EnPassantTarget);
 
@@ -292,7 +325,7 @@ namespace ChessTrainerApp.ViewModels
             }
 
             // перевірка чи зараз хід бота (поки що просто чорних)
-            if (!IsGameOver && CurrentTurn == PieceColor.Black)
+            if (!IsGameOver && CurrentTurn == BotColor)
                 await BotTurn();
         }
 
@@ -326,7 +359,7 @@ namespace ChessTrainerApp.ViewModels
             var bestMoveClone = await Task.Run(() => 
             {
                 // Передаємо КЛОН. Зміни тут не вплинуть на UI.
-                return ChessAI.GetBestMove(boardClone, CurrentTurn, 2, enPassantClone);
+                return ChessAI.GetBestMove(boardClone, CurrentTurn, _aiDepth, enPassantClone);
             });
 
             // 4. Застосовуємо результат на РЕАЛЬНІЙ дошці
@@ -447,6 +480,117 @@ namespace ChessTrainerApp.ViewModels
             };
 
             await Services.DatabaseService.AddGameAsync(record);
+        }
+    
+        public void SetupGame(PieceColor playerColor, int depth)
+        {
+            _aiDepth = depth;
+            
+            // Якщо гравець Білий -> Бот Чорний. І навпаки.
+            BotColor = playerColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
+
+            InitializeBoard();
+            
+            // Якщо Бот грає за Білих -> він ходить першим
+            if (BotColor == PieceColor.White)
+            {
+                Task.Run(async () => 
+                {
+                    await Task.Delay(1000);
+                    await BotTurn();
+                });
+            }
+        }
+    
+        public class GameState
+        {
+            public PieceModel[] BoardSnapshot { get; set; } // Масив фігур
+            public PieceColor Turn { get; set; }            // Чий хід
+            public SquareModel EnPassantTarget { get; set; } // Ціль для взяття
+            public string PgnText { get; set; }             // Текст історії
+            public List<string> MoveHistory { get; set; }   // Список ходів
+        }
+    
+        // --- МЕТОДИ НАВІГАЦІЇ ---
+        [RelayCommand]
+        private void GoToPreviousMove()
+        {
+            if (_currentMoveIndex > 0)
+            {
+                _currentMoveIndex--;
+                LoadState(_history[_currentMoveIndex]);
+            }
+        }
+        [RelayCommand]
+        private void GoToNextMove()
+        {
+            if (_currentMoveIndex < _history.Count - 1)
+            {
+                _currentMoveIndex++;
+                LoadState(_history[_currentMoveIndex]);
+            }
+        }
+
+        // --- МЕТОДИ ЗБЕРЕЖЕННЯ/ЗАВАНТАЖЕННЯ ---
+
+        // Викликати цей метод після КОЖНОГО ходу (і на початку гри)
+        private void SaveState()
+        {
+            // 1. Якщо ми повернулися назад і зробили новий хід - видаляємо "майбутнє"
+            if (_currentMoveIndex < _history.Count - 1)
+            {
+                _history.RemoveRange(_currentMoveIndex + 1, _history.Count - (_currentMoveIndex + 1));
+            }
+
+            // 2. Створюємо глибоку копію фігур (щоб вони не змінювались за посиланням)
+            var piecesCopy = new PieceModel[64];
+            for (int i = 0; i < 64; i++)
+            {
+                var original = Squares[i].Piece;
+                piecesCopy[i] = new PieceModel 
+                { 
+                    Type = original.Type, 
+                    Color = original.Color, 
+                    HasMoved = original.HasMoved 
+                };
+            }
+
+            // 3. Зберігаємо стан
+            var state = new GameState
+            {
+                BoardSnapshot = piecesCopy,
+                Turn = CurrentTurn,
+                EnPassantTarget = EnPassantTarget,
+                PgnText = PgnText,
+                MoveHistory = new List<string>(MoveHistory) // Копіюємо список
+            };
+
+            _history.Add(state);
+            _currentMoveIndex++;
+        }
+
+        private void LoadState(GameState state)
+        {
+            // Відновлюємо фігури на дошці
+            for (int i = 0; i < 64; i++)
+            {
+                // Оновлюємо властивості існуючих об'єктів SquareModel
+                // Це важливо, щоб UI відреагував (Binding)
+                Squares[i].Piece = state.BoardSnapshot[i];
+            }
+
+            // Відновлюємо змінні
+            CurrentTurn = state.Turn;
+            EnPassantTarget = state.EnPassantTarget;
+            PgnText = state.PgnText;
+            MoveHistory = new List<string>(state.MoveHistory);
+            
+            // Скидаємо виділення
+            if (SelectedSquare != null)
+            {
+                ResetSquareColor(SelectedSquare);
+                SelectedSquare = null;
+            }
         }
     }
 }

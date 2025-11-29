@@ -16,6 +16,8 @@
         <member name="T:ChessTrainerApp.ViewModels.ChessBoardViewModel">
             <inheritdoc/>
             <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
         </member>
         <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.SelectedSquare">
             <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.selectedSquare"/>
@@ -35,11 +37,49 @@
         <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.CurrentTurn">
             <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.currentTurn"/>
         </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.BotColor">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.botColor"/>
+        </member>
         <member name="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.handleSquareClickCommand">
             <summary>The backing field for <see cref="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.HandleSquareClickCommand"/>.</summary>
         </member>
         <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.HandleSquareClickCommand">
             <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand`1"/> instance wrapping <see cref="M:ChessTrainerApp.ViewModels.ChessBoardViewModel.HandleSquareClick(ChessTrainerApp.Models.SquareModel)"/>.</summary>
+        </member>
+        <member name="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.goToPreviousMoveCommand">
+            <summary>The backing field for <see cref="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.GoToPreviousMoveCommand"/>.</summary>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.GoToPreviousMoveCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand"/> instance wrapping <see cref="M:ChessTrainerApp.ViewModels.ChessBoardViewModel.GoToPreviousMove"/>.</summary>
+        </member>
+        <member name="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.goToNextMoveCommand">
+            <summary>The backing field for <see cref="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.GoToNextMoveCommand"/>.</summary>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.GoToNextMoveCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand"/> instance wrapping <see cref="M:ChessTrainerApp.ViewModels.ChessBoardViewModel.GoToNextMove"/>.</summary>
+        </member>
+        <member name="T:ChessTrainerApp.ViewModels.PlayViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.PlayViewModel.SelectedColorSide">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.PlayViewModel.selectedColorSide"/>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.PlayViewModel.SelectedDifficultyIndex">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.PlayViewModel.selectedDifficultyIndex"/>
+        </member>
+        <member name="F:ChessTrainerApp.ViewModels.PlayViewModel.selectSideCommand">
+            <summary>The backing field for <see cref="P:ChessTrainerApp.ViewModels.PlayViewModel.SelectSideCommand"/>.</summary>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.PlayViewModel.SelectSideCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand`1"/> instance wrapping <see cref="M:ChessTrainerApp.ViewModels.PlayViewModel.SelectSide(System.String)"/>.</summary>
+        </member>
+        <member name="F:ChessTrainerApp.ViewModels.PlayViewModel.startGameCommand">
+            <summary>The backing field for <see cref="P:ChessTrainerApp.ViewModels.PlayViewModel.StartGameCommand"/>.</summary>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.PlayViewModel.StartGameCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ChessTrainerApp.ViewModels.PlayViewModel.StartGame"/>.</summary>
         </member>
         <member name="T:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs">
             <summary>
@@ -71,6 +111,15 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.CurrentTurn">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "CurrentTurn" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.BotColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "BotColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SelectedColorSide">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SelectedColorSide" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SelectedDifficultyIndex">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SelectedDifficultyIndex" generated properties.</summary>
+        </member>
         <member name="T:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs">
             <summary>
             A helper type providing cached, reusable <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instances
@@ -100,6 +149,15 @@
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.CurrentTurn">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "CurrentTurn" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.BotColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "BotColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SelectedColorSide">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SelectedColorSide" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SelectedDifficultyIndex">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SelectedDifficultyIndex" generated properties.</summary>
         </member>
     </members>
 </doc>
