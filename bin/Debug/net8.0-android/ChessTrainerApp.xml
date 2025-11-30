@@ -13,7 +13,11 @@
         <member name="P:ChessTrainerApp.Models.SquareModel.SquareColor">
             <inheritdoc cref="F:ChessTrainerApp.Models.SquareModel.squareColor"/>
         </member>
+        <member name="P:ChessTrainerApp.Models.SquareModel.IsPossibleMove">
+            <inheritdoc cref="F:ChessTrainerApp.Models.SquareModel.isPossibleMove"/>
+        </member>
         <member name="T:ChessTrainerApp.ViewModels.ChessBoardViewModel">
+            <inheritdoc/>
             <inheritdoc/>
             <inheritdoc/>
             <inheritdoc/>
@@ -40,6 +44,21 @@
         <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.BotColor">
             <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.botColor"/>
         </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.TopPlayerName">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.topPlayerName"/>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.BottomPlayerName">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.bottomPlayerName"/>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.TopMaterialAdvantage">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.topMaterialAdvantage"/>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.BottomMaterialAdvantage">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.bottomMaterialAdvantage"/>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.BoardRotation">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.boardRotation"/>
+        </member>
         <member name="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.handleSquareClickCommand">
             <summary>The backing field for <see cref="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.HandleSquareClickCommand"/>.</summary>
         </member>
@@ -57,6 +76,12 @@
         </member>
         <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.GoToNextMoveCommand">
             <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand"/> instance wrapping <see cref="M:ChessTrainerApp.ViewModels.ChessBoardViewModel.GoToNextMove"/>.</summary>
+        </member>
+        <member name="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.resignGameCommand">
+            <summary>The backing field for <see cref="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.ResignGameCommand"/>.</summary>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.ResignGameCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand"/> instance wrapping <see cref="M:ChessTrainerApp.ViewModels.ChessBoardViewModel.ResignGame"/>.</summary>
         </member>
         <member name="T:ChessTrainerApp.ViewModels.PlayViewModel">
             <inheritdoc/>
@@ -93,6 +118,9 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SquareColor">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SquareColor" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsPossibleMove">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsPossibleMove" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SelectedSquare">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SelectedSquare" generated properties.</summary>
         </member>
@@ -114,6 +142,21 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.BotColor">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "BotColor" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.TopPlayerName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "TopPlayerName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.BottomPlayerName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "BottomPlayerName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.TopMaterialAdvantage">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "TopMaterialAdvantage" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.BottomMaterialAdvantage">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "BottomMaterialAdvantage" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.BoardRotation">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "BoardRotation" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SelectedColorSide">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SelectedColorSide" generated properties.</summary>
         </member>
@@ -131,6 +174,9 @@
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SquareColor">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SquareColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsPossibleMove">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsPossibleMove" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SelectedSquare">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SelectedSquare" generated properties.</summary>
@@ -152,6 +198,21 @@
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.BotColor">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "BotColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.TopPlayerName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "TopPlayerName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.BottomPlayerName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "BottomPlayerName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.TopMaterialAdvantage">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "TopMaterialAdvantage" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.BottomMaterialAdvantage">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "BottomMaterialAdvantage" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.BoardRotation">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "BoardRotation" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SelectedColorSide">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SelectedColorSide" generated properties.</summary>

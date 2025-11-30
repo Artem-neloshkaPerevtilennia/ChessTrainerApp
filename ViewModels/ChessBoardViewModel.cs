@@ -56,6 +56,21 @@ namespace ChessTrainerApp.ViewModels
         public RelayCommand PreviousMoveCommand { get; }
         public RelayCommand NextMoveCommand { get; }
 
+        [ObservableProperty]
+        private string topPlayerName = "Ботяра";
+
+        [ObservableProperty]
+        private string bottomPlayerName = "Ви";
+
+        [ObservableProperty]
+        private string topMaterialAdvantage = "";
+
+        [ObservableProperty]
+        private string bottomMaterialAdvantage = "";
+
+        [ObservableProperty]
+        private double boardRotation = 0;
+
         // --- У КОНСТРУКТОРІ ---
         public ChessBoardViewModel()
         {
@@ -100,6 +115,7 @@ namespace ChessTrainerApp.ViewModels
             
             // Зберігаємо початковий стан (хід 0)
             SaveState();
+            UpdateMaterialBalance();
         }
 
         // отримання фігури на клітинці на початку гри
@@ -143,46 +159,56 @@ namespace ChessTrainerApp.ViewModels
             // Якщо зараз хід Бота - ігноруємо кліки людини
             if (CurrentTurn == BotColor) return;
 
-            // сценарій 1: вибір фігури
-            if (SelectedSquare == null)
+            // СЦЕНАРІЙ 1: Вибір фігури (або зміна вибору)
+            if (SelectedSquare == null || (clickedSquare.Piece.Color == CurrentTurn && clickedSquare != SelectedSquare))
             {
-                if (clickedSquare.Piece.Type != PieceType.None &&
-                    clickedSquare.Piece.Color == CurrentTurn)
+                // Якщо клікнули на свою фігуру
+                if (clickedSquare.Piece.Type != PieceType.None && clickedSquare.Piece.Color == CurrentTurn)
                 {
+                    // 1. Скидаємо попередні виділення
+                    if (SelectedSquare != null) ResetSquareColor(SelectedSquare);
+                    ClearPossibleMoves(); 
+
+                    // 2. Виділяємо нову фігуру
                     SelectedSquare = clickedSquare;
-                    SelectedSquare.SquareColor = _selectedSquareColor; // виділення клітини фігури, яку обрано
+                    SelectedSquare.SquareColor = _selectedSquareColor; // Жовтий
+
+                    // 3. ✨ МАЛЮЄМО ЗЕЛЕНІ КРУЖЕЧКИ ✨
+                    var moves = ChessRules.GetValidMovesForPiece(SelectedSquare, Squares, EnPassantTarget);
+                    foreach (var move in moves)
+                    {
+                        move.IsPossibleMove = true;
+                    }
                 }
                 return;
             }
 
-            // сценарій 2: спроба ходу
-
-            // скидаємо колір виділення
+            // СЦЕНАРІЙ 2: Спроба ходу (Клік на іншу клітинку)
+            
+            // Скидаємо виділення фігури
             ResetSquareColor(SelectedSquare);
+            
+            // Скидаємо зелені кружечки (бо хід або зроблено, або скасовано)
+            ClearPossibleMoves();
 
-            // якщо клікнули на свою ж фігуру, то просто перемикаємо вибір
-            if (clickedSquare.Piece.Color == CurrentTurn)
+            // Якщо це той самий квадрат - просто знімаємо виділення (вже зроблено вище)
+            if (SelectedSquare == clickedSquare)
             {
-                SelectedSquare = clickedSquare;
-                SelectedSquare.SquareColor = _selectedSquareColor;
+                SelectedSquare = null;
                 return;
             }
 
-            // перевірка валідності ходу
+            // Робимо хід
             if (ChessRules.IsMoveValid(SelectedSquare, clickedSquare, Squares, EnPassantTarget))
             {
-                // відображення ходу
                 MakeMove(SelectedSquare, clickedSquare);
-
-                // перевірка на перетворення пішака на іншу фігуру
+                
                 if (clickedSquare.Piece.Type == PieceType.Pawn && (clickedSquare.Row == 0 || clickedSquare.Row == 7))
                 {
-                    // надаємо користувачу обрати фігуру
                     await PromotePawn(clickedSquare);
                 }
 
-                // передача ходу опоненту
-                SwitchTurn();
+                await SwitchTurn();
             }
 
             SelectedSquare = null;
@@ -242,6 +268,7 @@ namespace ChessTrainerApp.ViewModels
             }
 
             // SwitchTurn викликається у HandleSquareClick()
+            UpdateMaterialBalance();
         }
 
         // перетворення пішака
@@ -485,13 +512,15 @@ namespace ChessTrainerApp.ViewModels
         public void SetupGame(PieceColor playerColor, int depth)
         {
             _aiDepth = depth;
-            
-            // Якщо гравець Білий -> Бот Чорний. І навпаки.
             BotColor = playerColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
+
+            // 🔄 ЛОГІКА ПОВОРОТУ:
+            // Якщо гравець грає Чорними -> повертаємо дошку на 180
+            // Якщо Білими -> 0
+            BoardRotation = playerColor == PieceColor.Black ? 180 : 0;
 
             InitializeBoard();
             
-            // Якщо Бот грає за Білих -> він ходить першим
             if (BotColor == PieceColor.White)
             {
                 Task.Run(async () => 
@@ -501,7 +530,7 @@ namespace ChessTrainerApp.ViewModels
                 });
             }
         }
-    
+
         public class GameState
         {
             public PieceModel[] BoardSnapshot { get; set; } // Масив фігур
@@ -591,6 +620,91 @@ namespace ChessTrainerApp.ViewModels
                 ResetSquareColor(SelectedSquare);
                 SelectedSquare = null;
             }
+        }
+    
+        // вимикаємо всі зелені кружечки
+        private void ClearPossibleMoves()
+        {
+            foreach (var square in Squares)
+            {
+                square.IsPossibleMove = false;
+            }
+        }
+    
+        // У ChessBoardViewModel.cs
+        private void UpdateMaterialBalance()
+        {
+            int whiteScore = 0;
+            int blackScore = 0;
+
+            foreach (var square in Squares)
+            {
+                if (square.Piece.Type == PieceType.None || square.Piece.Type == PieceType.King) continue;
+
+                int value = square.Piece.Type switch
+                {
+                    PieceType.Pawn => 1,
+                    PieceType.Knight => 3,
+                    PieceType.Bishop => 3,
+                    PieceType.Rook => 5,
+                    PieceType.Queen => 9,
+                    _ => 0
+                };
+
+                if (square.Piece.Color == PieceColor.White)
+                    whiteScore += value;
+                else
+                    blackScore += value;
+            }
+
+            int diff = whiteScore - blackScore;
+
+            // Скидаємо значення
+            TopMaterialAdvantage = "";
+            BottomMaterialAdvantage = "";
+
+            if (diff == 0) return; // Матеріал рівний
+
+            // Логіка: Хто є хто?
+            // BotColor - це колір БОТА (Верхній гравець)
+            // PlayerColor - це колір ЛЮДИНИ (Нижній гравець)
+            
+            // Якщо БІЛІ мають перевагу (diff > 0)
+            if (diff > 0)
+            {
+                if (BotColor == PieceColor.White) 
+                    TopMaterialAdvantage = $"+{diff}"; // Бот білий, він веде
+                else 
+                    BottomMaterialAdvantage = $"+{diff}"; // Ти білий, ти ведеш
+            }
+            // Якщо ЧОРНІ мають перевагу (diff < 0)
+            else 
+            {
+                int absDiff = Math.Abs(diff);
+                if (BotColor == PieceColor.Black) 
+                    TopMaterialAdvantage = $"+{absDiff}"; // Бот чорний, він веде
+                else 
+                    BottomMaterialAdvantage = $"+{absDiff}"; // Ти чорний, ти ведеш
+            }
+        }
+
+        // здача партії
+        [RelayCommand]
+        private void ResignGame()
+        {
+            // Якщо гра вже завершена або це режим перегляду - нічого не робимо
+            if (GameStatus != GameStatus.InProgress) return;
+
+            // Гравець здається -> Переміг Бот
+            var winnerColor = BotColor; 
+
+            // Встановлюємо статус
+            GameStatus = GameStatus.Checkmate; // Технічно це поразка
+            GameOverMessage = "🏳️ Ви здалися!";
+            IsGameOver = true;
+
+            // Зберігаємо результат у базу
+            SaveGameResult(winnerColor.ToString());
         }
     }
 }

@@ -13,7 +13,10 @@ namespace ChessTrainerApp.Models
         [ObservableProperty]
         private Color squareColor; // Для кольору дошки (Black/White)
 
+        [ObservableProperty]
+        private bool isPossibleMove;
+
         // Властивість для Binding у XAML
-        public string PositionName => $"{(char)('a' + Column)}{8 - Row}"; 
+        public string PositionName => $"{(char)('a' + Column)}{8 - Row}";
     }
 }

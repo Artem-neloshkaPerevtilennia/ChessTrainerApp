@@ -266,4 +266,20 @@ public static class ChessRules
         }
         return moves;
     }
+
+    // пошук можливих ходів для фігури
+    public static List<SquareModel> GetValidMovesForPiece(SquareModel fromSquare, IList<SquareModel> board, SquareModel enPassantTarget)
+    {
+        var validMoves = new List<SquareModel>();
+
+        foreach (var toSquare in board)
+        {
+            // Використовуємо твій існуючий метод перевірки
+            if (IsMoveValid(fromSquare, toSquare, new ObservableCollection<SquareModel>(board), enPassantTarget))
+            {
+                validMoves.Add(toSquare);
+            }
+        }
+        return validMoves;
+    }
 }
