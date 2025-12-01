@@ -22,6 +22,7 @@
             <inheritdoc/>
             <inheritdoc/>
             <inheritdoc/>
+            <inheritdoc/>
         </member>
         <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.SelectedSquare">
             <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.selectedSquare"/>
@@ -59,6 +60,18 @@
         <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.BoardRotation">
             <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.boardRotation"/>
         </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.CurrentGameMode">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.currentGameMode"/>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.CanUndoMove">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.canUndoMove"/>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.IsTrainingMode">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.isTrainingMode"/>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.IsBlindfoldMode">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.isBlindfoldMode"/>
+        </member>
         <member name="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.handleSquareClickCommand">
             <summary>The backing field for <see cref="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.HandleSquareClickCommand"/>.</summary>
         </member>
@@ -83,6 +96,12 @@
         <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.ResignGameCommand">
             <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand"/> instance wrapping <see cref="M:ChessTrainerApp.ViewModels.ChessBoardViewModel.ResignGame"/>.</summary>
         </member>
+        <member name="F:ChessTrainerApp.ViewModels.ChessBoardViewModel.undoLastMoveCommand">
+            <summary>The backing field for <see cref="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.UndoLastMoveCommand"/>.</summary>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ChessBoardViewModel.UndoLastMoveCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand"/> instance wrapping <see cref="M:ChessTrainerApp.ViewModels.ChessBoardViewModel.UndoLastMove"/>.</summary>
+        </member>
         <member name="T:ChessTrainerApp.ViewModels.PlayViewModel">
             <inheritdoc/>
             <inheritdoc/>
@@ -93,6 +112,9 @@
         </member>
         <member name="P:ChessTrainerApp.ViewModels.PlayViewModel.SelectedDifficultyIndex">
             <inheritdoc cref="F:ChessTrainerApp.ViewModels.PlayViewModel.selectedDifficultyIndex"/>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.PlayViewModel.SelectedGameModeIndex">
+            <inheritdoc cref="F:ChessTrainerApp.ViewModels.PlayViewModel._selectedGameModeIndex"/>
         </member>
         <member name="F:ChessTrainerApp.ViewModels.PlayViewModel.selectSideCommand">
             <summary>The backing field for <see cref="P:ChessTrainerApp.ViewModels.PlayViewModel.SelectSideCommand"/>.</summary>
@@ -157,11 +179,26 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.BoardRotation">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "BoardRotation" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.CurrentGameMode">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "CurrentGameMode" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.CanUndoMove">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "CanUndoMove" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsTrainingMode">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsTrainingMode" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsBlindfoldMode">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsBlindfoldMode" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SelectedColorSide">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SelectedColorSide" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SelectedDifficultyIndex">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SelectedDifficultyIndex" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SelectedGameModeIndex">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SelectedGameModeIndex" generated properties.</summary>
         </member>
         <member name="T:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs">
             <summary>
@@ -214,11 +251,26 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.BoardRotation">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "BoardRotation" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.CurrentGameMode">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "CurrentGameMode" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.CanUndoMove">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "CanUndoMove" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsTrainingMode">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsTrainingMode" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsBlindfoldMode">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsBlindfoldMode" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SelectedColorSide">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SelectedColorSide" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SelectedDifficultyIndex">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SelectedDifficultyIndex" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SelectedGameModeIndex">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SelectedGameModeIndex" generated properties.</summary>
         </member>
     </members>
 </doc>

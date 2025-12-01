@@ -8,11 +8,14 @@ public partial class PlayViewModel : ObservableObject
 {
     // Обраний колір: "White", "Black" або "Random"
     [ObservableProperty]
-    private string selectedColorSide = "White"; 
+    private string selectedColorSide = "White";
 
     // Обранa складність (індекс у пікері: 0=Easy, 1=Medium, 2=Hard)
     [ObservableProperty]
     private int selectedDifficultyIndex = 1; // За замовчуванням Середня
+
+    [ObservableProperty]
+    private int _selectedGameModeIndex = 0;
 
     [RelayCommand]
     private void SelectSide(string side)
@@ -23,36 +26,39 @@ public partial class PlayViewModel : ObservableObject
     [RelayCommand]
     private async Task StartGame()
     {
-        // 1. Визначаємо глибину ШІ
+        // 1. Визначаємо глибину
         int depth = SelectedDifficultyIndex switch
         {
-            0 => 2, // Легка
-            1 => 3, // Середня
-            2 => 4, // Важка
-            _ => 3
+            0 => 1,
+            1 => 2,
+            2 => 3,
+            _ => 2
         };
 
         // 2. Визначаємо колір
-        PieceColor playerColor;
-        if (SelectedColorSide == "Random")
+        PieceColor playerColor = SelectedColorSide switch
         {
-            playerColor = new Random().Next(0, 2) == 0 ? PieceColor.White : PieceColor.Black;
-        }
-        else
+            "Random" => new Random().Next(0, 2) == 0 ? PieceColor.White : PieceColor.Black,
+            "Black" => PieceColor.Black,
+            _ => PieceColor.White
+        };
+
+        // 3. 👇 ВИЗНАЧАЄМО РЕЖИМ (ВИПРАВЛЕННЯ) 👇
+        GameMode mode = GameMode.Training;
+        
+        // Якщо обрано третій пункт (індекс 2) -> Виклик
+        if (SelectedGameModeIndex == 1) 
         {
-            playerColor = SelectedColorSide == "White" ? PieceColor.White : PieceColor.Black;
+            mode = GameMode.Challenge;
         }
 
-        // 3. Створюємо сторінку (викликається стандартний конструктор)
+        // 4. Створюємо сторінку і передаємо параметри
         var gamePage = new ChessBoardPage();
-
-        // 4. Дістаємо з неї ViewModel і налаштовуємо гру ВРУЧНУ
         if (gamePage.BindingContext is ChessBoardViewModel vm)
         {
-            vm.SetupGame(playerColor, depth);
+            vm.SetupGame(playerColor, depth, mode);
         }
 
-        // 5. Переходимо на сторінку
         await Shell.Current.Navigation.PushAsync(gamePage);
     }
 }

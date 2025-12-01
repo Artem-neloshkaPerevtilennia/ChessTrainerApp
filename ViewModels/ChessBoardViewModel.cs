@@ -71,6 +71,25 @@ namespace ChessTrainerApp.ViewModels
         [ObservableProperty]
         private double boardRotation = 0;
 
+        [ObservableProperty]
+        private GameMode currentGameMode;
+
+        [ObservableProperty]
+        private bool canUndoMove;
+
+        [ObservableProperty]
+        private bool isTrainingMode;
+
+        [ObservableProperty]
+        private bool isBlindfoldMode;
+
+        // Колір для останнього ходу (схожий на selection, але трохи темніший/інший)
+        private readonly Color _lastMoveColor = Color.FromHex("#CED26A"); 
+
+        // Зберігаємо посилання на клітинки останнього ходу
+        private SquareModel _lastFromSquare;
+        private SquareModel _lastToSquare;
+
         // --- У КОНСТРУКТОРІ ---
         public ChessBoardViewModel()
         {
@@ -155,54 +174,63 @@ namespace ChessTrainerApp.ViewModels
         private async Task HandleSquareClick(SquareModel clickedSquare)
         {
             if (GameStatus != GameStatus.InProgress) return;
-
-            // Якщо зараз хід Бота - ігноруємо кліки людини
             if (CurrentTurn == BotColor) return;
+            if (_currentMoveIndex < _history.Count - 1) return;
 
-            // СЦЕНАРІЙ 1: Вибір фігури (або зміна вибору)
+            // СЦЕНАРІЙ 1: Вибір фігури
+            // Якщо нічого не обрано АБО клікнули на свою іншу фігуру
             if (SelectedSquare == null || (clickedSquare.Piece.Color == CurrentTurn && clickedSquare != SelectedSquare))
             {
-                // Якщо клікнули на свою фігуру
                 if (clickedSquare.Piece.Type != PieceType.None && clickedSquare.Piece.Color == CurrentTurn)
                 {
-                    // 1. Скидаємо попередні виділення
-                    if (SelectedSquare != null) ResetSquareColor(SelectedSquare);
-                    ClearPossibleMoves(); 
-
-                    // 2. Виділяємо нову фігуру
-                    SelectedSquare = clickedSquare;
-                    SelectedSquare.SquareColor = _selectedSquareColor; // Жовтий
-
-                    // 3. ✨ МАЛЮЄМО ЗЕЛЕНІ КРУЖЕЧКИ ✨
-                    var moves = ChessRules.GetValidMovesForPiece(SelectedSquare, Squares, EnPassantTarget);
-                    foreach (var move in moves)
+                    // Знімаємо старе виділення
+                    if (SelectedSquare != null) 
                     {
-                        move.IsPossibleMove = true;
+                        var oldSelection = SelectedSquare;
+                        SelectedSquare = null;
+                        UpdateSquareColor(oldSelection);
                     }
+                    
+                    ClearPossibleMoves();
+
+                    // Виділяємо нову
+                    SelectedSquare = clickedSquare;
+                    UpdateSquareColor(SelectedSquare);
+
+                    var moves = ChessRules.GetValidMovesForPiece(SelectedSquare, Squares, EnPassantTarget);
+                    foreach (var move in moves) move.IsPossibleMove = true;
                 }
                 return;
             }
 
-            // СЦЕНАРІЙ 2: Спроба ходу (Клік на іншу клітинку)
+            // СЦЕНАРІЙ 2: Спроба ходу
             
-            // Скидаємо виділення фігури
-            ResetSquareColor(SelectedSquare);
-            
-            // Скидаємо зелені кружечки (бо хід або зроблено, або скасовано)
-            ClearPossibleMoves();
+            // 1. Запам'ятовуємо, хто ходить
+            var originSquare = SelectedSquare;
 
-            // Якщо це той самий квадрат - просто знімаємо виділення (вже зроблено вище)
-            if (SelectedSquare == clickedSquare)
+            // 2. Скасування вибору (якщо клікнули на ту саму фігуру)
+            if (originSquare == clickedSquare)
             {
                 SelectedSquare = null;
+                UpdateSquareColor(originSquare);
+                ClearPossibleMoves();
                 return;
             }
 
-            // Робимо хід
-            if (ChessRules.IsMoveValid(SelectedSquare, clickedSquare, Squares, EnPassantTarget))
+            // 3. Валідація і Хід
+            if (ChessRules.IsMoveValid(originSquare, clickedSquare, Squares, EnPassantTarget))
             {
-                MakeMove(SelectedSquare, clickedSquare);
+                // ❗ КЛЮЧОВИЙ МОМЕНТ ❗
+                // Спочатку прибираємо "Вибір" (Selection), щоб він не перебивав колір "Останнього ходу"
+                SelectedSquare = null;
                 
+                // Оновлюємо колір клітинки, з якої йдемо (вона перестане бути Selected)
+                UpdateSquareColor(originSquare); 
+                ClearPossibleMoves();
+
+                // Тепер робимо хід (він пофарбує клітинки у LastMoveColor)
+                MakeMove(originSquare, clickedSquare);
+
                 if (clickedSquare.Piece.Type == PieceType.Pawn && (clickedSquare.Row == 0 || clickedSquare.Row == 7))
                 {
                     await PromotePawn(clickedSquare);
@@ -210,52 +238,61 @@ namespace ChessTrainerApp.ViewModels
 
                 await SwitchTurn();
             }
-
-            SelectedSquare = null;
+            // Якщо хід невалідний - нічого не робимо (можна лишити виділення або скинути)
         }
 
         // виконання ходу
         private void MakeMove(SquareModel from, SquareModel to)
         {
-            // запис ходу
+            // 1. Зберігаємо посилання на старі підсвічені клітинки
+            var prevFrom = _lastFromSquare;
+            var prevTo = _lastToSquare;
+
+            // 2. Оновлюємо глобальні змінні на НОВИЙ хід
+            _lastFromSquare = from;
+            _lastToSquare = to;
+
+            // 3. "Миємо" старі клітинки
+            // Оскільки _lastFromSquare вже змінився, UpdateSquareColor поверне їм звичайний колір
+            if (prevFrom != null) UpdateSquareColor(prevFrom);
+            if (prevTo != null) UpdateSquareColor(prevTo);
+
+            // --- ЛОГІКА ХОДУ ---
             RecordMove(from, to);
 
-            // рокировка
+            // Рокировка
             if (from.Piece.Type == PieceType.King && Math.Abs(to.Column - from.Column) == 2)
             {
                 int direction = to.Column - from.Column > 0 ? 1 : -1;
                 int rookOldCol = direction == 1 ? 7 : 0;
                 int rookNewCol = direction == 1 ? 5 : 3;
-
                 var rookOldSq = Squares[from.Row * 8 + rookOldCol];
                 var rookNewSq = Squares[from.Row * 8 + rookNewCol];
-
+                
                 rookNewSq.Piece = rookOldSq.Piece;
                 rookOldSq.Piece = new PieceModel { Type = PieceType.None, Color = PieceColor.None };
                 rookNewSq.Piece.HasMoved = true;
+                
+                // Оновлюємо колір тури, щоб прибрати артефакти
+                UpdateSquareColor(rookOldSq);
+                UpdateSquareColor(rookNewSq);
             }
 
-            // взяття на проході
-            if (from.Piece.Type == PieceType.Pawn &&
-                from.Column != to.Column &&
-                to.Piece.Type == PieceType.None)
+            // En Passant
+            if (from.Piece.Type == PieceType.Pawn && from.Column != to.Column && to.Piece.Type == PieceType.None)
             {
-                // Ворог стоїть на тому ж рядку, звідки ми прийшли, але в колонці, куди ми йдемо
                 int enemyPawnRow = from.Row;
                 int enemyPawnCol = to.Column;
-
                 var enemyPawnSq = Squares[enemyPawnRow * 8 + enemyPawnCol];
-
-                // З'їдаємо ворога
                 enemyPawnSq.Piece = new PieceModel { Type = PieceType.None, Color = PieceColor.None };
             }
 
-            // фізичний хід
+            // Фізичний хід
             to.Piece = from.Piece;
             from.Piece = new PieceModel { Type = PieceType.None, Color = PieceColor.None };
             to.Piece.HasMoved = true;
 
-            // якщо пішак стрибнув на 2 клітинки, то запам'ятовуємо клітинку за ним
+            // En Passant Target
             if (to.Piece.Type == PieceType.Pawn && Math.Abs(to.Row - from.Row) == 2)
             {
                 int middleRow = (from.Row + to.Row) / 2;
@@ -263,12 +300,12 @@ namespace ChessTrainerApp.ViewModels
             }
             else
             {
-                // будь-який інший хід скидає можливість взяття на проході
                 EnPassantTarget = null;
             }
 
-            // SwitchTurn викликається у HandleSquareClick()
-            UpdateMaterialBalance();
+            // 4. Фарбуємо НОВИЙ хід (Тепер SelectedSquare == null, тому спрацює умова LastMove)
+            UpdateSquareColor(from);
+            UpdateSquareColor(to);
         }
 
         // перетворення пішака
@@ -509,14 +546,17 @@ namespace ChessTrainerApp.ViewModels
             await Services.DatabaseService.AddGameAsync(record);
         }
     
-        public void SetupGame(PieceColor playerColor, int depth)
+        public void SetupGame(PieceColor playerColor, int depth, GameMode mode, bool isBlindfold = false)
         {
             _aiDepth = depth;
+            CurrentGameMode = mode;
+            IsTrainingMode = (mode == GameMode.Training);
             BotColor = playerColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
+            
+            // Встановлюємо режим наосліп
+            IsBlindfoldMode = isBlindfold; 
 
-            // 🔄 ЛОГІКА ПОВОРОТУ:
-            // Якщо гравець грає Чорними -> повертаємо дошку на 180
-            // Якщо Білими -> 0
+            // Поворот дошки
             BoardRotation = playerColor == PieceColor.Black ? 180 : 0;
 
             InitializeBoard();
@@ -705,6 +745,64 @@ namespace ChessTrainerApp.ViewModels
 
             // Зберігаємо результат у базу
             SaveGameResult(winnerColor.ToString());
+        }
+    
+        [RelayCommand]
+        private void UndoLastMove()
+        {
+            // Перевірки:
+            // 1. Гра має тривати (або закінчитися, якщо ми зівнули мат і хочемо переходити)
+            // 2. Це має бути Навчальний режим
+            // 3. Має бути хоча б 2 записи в історії (Старт -> Мій Хід -> Хід Бота) = 3 стани. 
+            //    Тобто щоб відкотити хід бота і свій, треба мати мінімум 2 ходи в історії.
+            
+            if (CurrentGameMode != GameMode.Training) return;
+            if (_history.Count < 2) return; // Нема куди вертати
+
+            // Якщо зараз хід Бота (він думає), не можна перебивати
+            if (CurrentTurn == BotColor) return;
+
+            // ЛОГІКА ВІДКАТУ
+            // Нам треба видалити ОСТАННІЙ стан (де походив бот) і ПЕРЕДОСТАННІЙ (де походив я).
+            // Тобто ми повертаємося до стану _history.Count - 3 (або просто видаляємо 2 останні)
+            
+            // Видаляємо останній стан (Хід бота)
+            _history.RemoveAt(_history.Count - 1);
+            
+            // Видаляємо передостанній стан (Мій хід)
+            if (_history.Count > 0)
+            {
+                _history.RemoveAt(_history.Count - 1);
+            }
+            
+            // Також чистимо PGN текст і список ходів, бо вони "відрізаються"
+            // Але оскільки ми повністю перезавантажуємо стан з LoadState, 
+            // то PgnText і MoveHistory відновляться зі збереженого стану автоматично!
+
+            // Завантажуємо актуальний останній стан
+            _currentMoveIndex = _history.Count - 1;
+            LoadState(_history[_currentMoveIndex]);
+
+            // Якщо гра закінчилась (мат/пат), ми її "воскрешаємо"
+            IsGameOver = false;
+            GameStatus = GameStatus.InProgress;
+        }
+    
+        private void UpdateSquareColor(SquareModel square)
+        {
+            if (SelectedSquare == square)
+            {
+                square.SquareColor = _selectedSquareColor; // Яскравий (Selection)
+            }
+            else if (square == _lastFromSquare || square == _lastToSquare)
+            {
+                square.SquareColor = _lastMoveColor; // Тьмяний (Last Move)
+            }
+            else
+            {
+                bool isEven = (square.Row + square.Column) % 2 == 0;
+                square.SquareColor = isEven ? _lightSquareColor : _darkSquareColor;
+            }
         }
     }
 }

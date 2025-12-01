@@ -83,9 +83,10 @@
                            HorizontalTextAlignment="Center" FontAttributes="Bold"/>
 
                     <Frame BackgroundColor="#80000000" CornerRadius="15" BorderColor="Gray" Padding="0">
-                        <Picker Title="Оберіть режим" SelectedIndex="0"
+                        <Picker Title="Оберіть режим"
                                 TextColor="White" TitleColor="Gray"
-                                HorizontalTextAlignment="Center" FontSize="18">
+                                HorizontalTextAlignment="Center" FontSize="18"
+                                SelectedIndex="{Binding SelectedGameModeIndex}">
                             <Picker.Items>
                                 <x:String>Навчальний</x:String>
                                 <x:String>Турнірний</x:String>
