@@ -17,6 +17,9 @@ public partial class PlayViewModel : ObservableObject
     [ObservableProperty]
     private int _selectedGameModeIndex = 0;
 
+    [ObservableProperty]
+    private bool isBlindfoldEnabled;
+
     [RelayCommand]
     private void SelectSide(string side)
     {
@@ -30,9 +33,9 @@ public partial class PlayViewModel : ObservableObject
         int depth = SelectedDifficultyIndex switch
         {
             0 => 2,
-            1 => 4,
-            2 => 6,
-            _ => 4
+            1 => 3,
+            2 => 4,
+            _ => 3
         };
 
         // 2. Визначаємо колір
@@ -43,20 +46,13 @@ public partial class PlayViewModel : ObservableObject
             _ => PieceColor.White
         };
 
-        // 3. 👇 ВИЗНАЧАЄМО РЕЖИМ (ВИПРАВЛЕННЯ) 👇
         GameMode mode = GameMode.Training;
-        
-        // Якщо обрано третій пункт (індекс 2) -> Виклик
-        if (SelectedGameModeIndex == 1) 
-        {
-            mode = GameMode.Challenge;
-        }
+        if (SelectedGameModeIndex == 1) mode = GameMode.Challenge;
 
-        // 4. Створюємо сторінку і передаємо параметри
         var gamePage = new ChessBoardPage();
         if (gamePage.BindingContext is ChessBoardViewModel vm)
         {
-            vm.SetupGame(playerColor, depth, mode);
+            vm.SetupGame(playerColor, depth, mode, IsBlindfoldEnabled);
         }
 
         await Shell.Current.Navigation.PushAsync(gamePage);

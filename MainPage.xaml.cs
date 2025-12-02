@@ -17,22 +17,9 @@ public partial class MainPage : ContentPage
 		await Navigation.PushAsync(new ArchivePage());
 	}
 
-	private async void OnPlayBlindfold(object sender, EventArgs e)
+	private async void OnGoToRulesPage(object sender, EventArgs e)
 	{
-		// Створюємо сторінку
-		var gamePage = new ChessBoardPage();
-
-		if (gamePage.BindingContext is ChessTrainerApp.ViewModels.ChessBoardViewModel vm)
-		{
-			// Запускаємо: Гравець Білі, Глибина 2, Режим Навчальний, Наосліп = TRUE
-			vm.SetupGame(
-				ChessTrainerApp.Models.PieceColor.White, 
-				2, 
-				ChessTrainerApp.Models.GameMode.Training, 
-				true); // <--- Вмикаємо сліпий режим
-		}
-
-		await Navigation.PushAsync(gamePage);
+		await Navigation.PushAsync(new RulesPage());
 	}
 
 	private void OnQuit(object sender, EventArgs e)

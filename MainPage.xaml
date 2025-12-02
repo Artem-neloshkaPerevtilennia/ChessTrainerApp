@@ -13,7 +13,7 @@
             <FlexLayout Direction="Column" Grid.Row="1" Grid.Column="1">
                 <Button Text="Початок гри" Style="{StaticResource HomePageBtn}" Clicked="OnGoToPlayPage"></Button>
                 <Button Text="Архів партій" Style="{StaticResource HomePageBtn}" Clicked="OnGoToArchievePage"></Button>
-                <Button Text="Шахи наосліп" Style="{StaticResource HomePageBtn}" Clicked="OnPlayBlindfold"></Button>
+                <Button Text="Правила гри" Style="{StaticResource HomePageBtn}" Clicked="OnGoToRulesPage"> </Button>
                 <Button Text="Вихід" Style="{StaticResource HomePageBtn}" Clicked="OnQuit"></Button>
             </FlexLayout>
         </Grid>

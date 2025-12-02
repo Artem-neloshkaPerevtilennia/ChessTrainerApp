@@ -16,93 +16,130 @@
     <Grid>
         <Image Source="homepage.webp" Aspect="AspectFill" Opacity="0.60" ZIndex="0"/>
 
-        <Grid RowDefinitions="0.2*, 0.8*" ColumnDefinitions="0.5*, 3*, 0.5*" ZIndex="1">
+        <Grid RowDefinitions="0.1*, 0.9*" ColumnDefinitions="0.5*, 3*, 0.5*" ZIndex="1">
 
-            <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="30"
-                                 VerticalOptions="Center" HorizontalOptions="Fill">
+            <ScrollView Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Never">
+                
+                <VerticalStackLayout Spacing="30"
+                                     VerticalOptions="Center" 
+                                     HorizontalOptions="Fill"
+                                     Padding="0,0,0,20"> <VerticalStackLayout Spacing="15">
+                        <Label Text="Я граю за" FontSize="22" TextColor="White" 
+                               HorizontalTextAlignment="Center" FontAttributes="Bold"/>
 
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="Я граю за" FontSize="22" TextColor="White" 
-                           HorizontalTextAlignment="Center" FontAttributes="Bold"/>
+                        <HorizontalStackLayout Spacing="20" HorizontalOptions="Center">
+                            
+                            <Border StrokeThickness="3" BackgroundColor="#80000000"
+                                    HeightRequest="80" WidthRequest="80" StrokeShape="RoundRectangle 10">
+                                <Border.Stroke>
+                                    <SolidColorBrush Color="Transparent"/>
+                                </Border.Stroke>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding SelectedColorSide}" Value="White">
+                                        <Setter Property="Stroke" Value="LightGreen"/>
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="♔" FontSize="50" TextColor="White" 
+                                       HorizontalOptions="Center" VerticalOptions="Center"/>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SelectSideCommand}" CommandParameter="White"/>
+                                </Border.GestureRecognizers>
+                            </Border>
 
-                    <HorizontalStackLayout Spacing="20" HorizontalOptions="Center">
-                        
-                        <Border Stroke="{Binding SelectedColorSide, Converter={StaticResource SelectionConverter}, ConverterParameter='White'}"
-                                StrokeThickness="3" BackgroundColor="#80000000"
-                                HeightRequest="80" WidthRequest="80" StrokeShape="RoundRectangle 10">
-                            <Label Text="♔" FontSize="50" TextColor="White" 
-                                   HorizontalOptions="Center" VerticalOptions="Center"/>
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding SelectSideCommand}" CommandParameter="White"/>
-                            </Border.GestureRecognizers>
-                        </Border>
+                            <Border StrokeThickness="3" BackgroundColor="#80000000"
+                                    HeightRequest="80" WidthRequest="80" StrokeShape="RoundRectangle 10">
+                                <Border.Stroke>
+                                    <SolidColorBrush Color="Transparent"/>
+                                </Border.Stroke>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding SelectedColorSide}" Value="Random">
+                                        <Setter Property="Stroke" Value="LightGreen"/>
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="☯" FontSize="50" TextColor="Gray" 
+                                       HorizontalOptions="Center" VerticalOptions="Center"/>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SelectSideCommand}" CommandParameter="Random"/>
+                                </Border.GestureRecognizers>
+                            </Border>
 
-                        <Border Stroke="{Binding SelectedColorSide, Converter={StaticResource SelectionConverter}, ConverterParameter='Random'}"
-                                StrokeThickness="3" BackgroundColor="#80000000"
-                                HeightRequest="80" WidthRequest="80" StrokeShape="RoundRectangle 10">
-                            <Label Text="☯" FontSize="50" TextColor="Gray" 
-                                   HorizontalOptions="Center" VerticalOptions="Center"/>
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding SelectSideCommand}" CommandParameter="Random"/>
-                            </Border.GestureRecognizers>
-                        </Border>
+                            <Border StrokeThickness="3" BackgroundColor="#80000000"
+                                    HeightRequest="80" WidthRequest="80" StrokeShape="RoundRectangle 10">
+                                <Border.Stroke>
+                                    <SolidColorBrush Color="Transparent"/>
+                                </Border.Stroke>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding SelectedColorSide}" Value="Black">
+                                        <Setter Property="Stroke" Value="LightGreen"/>
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="♚" FontSize="50" TextColor="Black" 
+                                       HorizontalOptions="Center" VerticalOptions="Center"/>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SelectSideCommand}" CommandParameter="Black"/>
+                                </Border.GestureRecognizers>
+                            </Border>
 
-                        <Border Stroke="{Binding SelectedColorSide, Converter={StaticResource SelectionConverter}, ConverterParameter='Black'}"
-                                StrokeThickness="3" BackgroundColor="#80000000"
-                                HeightRequest="80" WidthRequest="80" StrokeShape="RoundRectangle 10">
-                            <Label Text="♚" FontSize="50" TextColor="Black" 
-                                   HorizontalOptions="Center" VerticalOptions="Center"/>
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding SelectSideCommand}" CommandParameter="Black"/>
-                            </Border.GestureRecognizers>
-                        </Border>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
 
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Складність" FontSize="22" TextColor="White" 
+                               HorizontalTextAlignment="Center" FontAttributes="Bold"/>
 
+                        <Frame BackgroundColor="#80000000" CornerRadius="15" BorderColor="Gray" Padding="0">
+                            <Picker SelectedIndex="{Binding SelectedDifficultyIndex}"
+                                    TextColor="White" TitleColor="Gray"
+                                    HorizontalTextAlignment="Center" FontSize="18">
+                                <Picker.Items>
+                                    <x:String>Легка (2 ходи)</x:String>
+                                    <x:String>Середня (3 ходи)</x:String>
+                                    <x:String>Важка (4 ходи)</x:String>
+                                </Picker.Items>
+                            </Picker>
+                        </Frame>
+                    </VerticalStackLayout>
 
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Складність" FontSize="22" TextColor="White" 
-                           HorizontalTextAlignment="Center" FontAttributes="Bold"/>
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Режим" FontSize="22" TextColor="White" 
+                               HorizontalTextAlignment="Center" FontAttributes="Bold"/>
 
-                    <Frame BackgroundColor="#80000000" CornerRadius="15" BorderColor="Gray" Padding="0">
-                        <Picker SelectedIndex="{Binding SelectedDifficultyIndex}"
-                                TextColor="White" TitleColor="Gray"
-                                HorizontalTextAlignment="Center" FontSize="18">
-                            <Picker.Items>
-                                <x:String>Легка (1 хід)</x:String>
-                                <x:String>Середня (2 ходи)</x:String>
-                                <x:String>Важка (3 ходи)</x:String>
-                            </Picker.Items>
-                        </Picker>
+                        <Frame BackgroundColor="#80000000" CornerRadius="15" BorderColor="Gray" Padding="0">
+                            <Picker x:Name="GameModePicker"
+                                    Title="Оберіть режим"
+                                    SelectedIndex="{Binding SelectedGameModeIndex}"
+                                    TextColor="White" TitleColor="Gray"
+                                    HorizontalTextAlignment="Center" FontSize="18">
+                                <Picker.Items>
+                                    <x:String>Навчальний</x:String>
+                                    <x:String>Виклик</x:String>
+                                </Picker.Items>
+                            </Picker>
+                        </Frame>
+                    </VerticalStackLayout>
+
+                    <Frame BackgroundColor="#80000000" CornerRadius="12" BorderColor="Gray" Padding="15,10">
+                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="15">
+                            <Label Text="Режим наосліп 🙈" 
+                                   FontSize="20" 
+                                   TextColor="White" 
+                                   VerticalOptions="Center"/>
+                            
+                            <Switch IsToggled="{Binding IsBlindfoldEnabled}" 
+                                    OnColor="#769656" 
+                                    ThumbColor="White"/>
+                        </HorizontalStackLayout>
                     </Frame>
+
+                    <Button Text="Почати гру!" 
+                            Command="{Binding StartGameCommand}"
+                            BackgroundColor="#769656" TextColor="White"
+                            HeightRequest="60" CornerRadius="30"
+                            FontSize="20" FontAttributes="Bold"
+                            Margin="0,10,0,0"/>
+
                 </VerticalStackLayout>
-
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Режим" FontSize="22" TextColor="White" 
-                           HorizontalTextAlignment="Center" FontAttributes="Bold"/>
-
-                    <Frame BackgroundColor="#80000000" CornerRadius="15" BorderColor="Gray" Padding="0">
-                        <Picker Title="Оберіть режим"
-                                TextColor="White" TitleColor="Gray"
-                                HorizontalTextAlignment="Center" FontSize="18"
-                                SelectedIndex="{Binding SelectedGameModeIndex}">
-                            <Picker.Items>
-                                <x:String>Навчальний</x:String>
-                                <x:String>Турнірний</x:String>
-                            </Picker.Items>
-                        </Picker>
-                    </Frame>
-                </VerticalStackLayout>
-
-                <Button Text="Почати гру!" 
-                        Command="{Binding StartGameCommand}"
-                        BackgroundColor="#769656" TextColor="White"
-                        HeightRequest="60" CornerRadius="30"
-                        FontSize="20" FontAttributes="Bold"
-                        Margin="0,20,0,0"/>
-
-            </VerticalStackLayout>
+            </ScrollView>
         </Grid>
     </Grid>
 </ContentPage>

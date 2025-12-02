@@ -1,0 +1,58 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ChessTrainerApp.RulesPage"
+             Title="Правила гри"
+             BackgroundColor="#121212">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            
+            <Label Text="Правила Шахів" 
+                   FontSize="32" FontAttributes="Bold" TextColor="#FFD700" 
+                   HorizontalOptions="Center"/>
+
+            <BoxView HeightRequest="1" Color="Gray"/>
+
+            <Label Text="🎯 Мета гри" FontSize="22" FontAttributes="Bold" TextColor="White"/>
+            <Label Text="Мета гри — поставити мат королю суперника. Мат — це ситуація, коли король знаходиться під шахом (атакою) і не може від нього врятуватися." 
+                   TextColor="#E0E0E0" FontSize="16"/>
+
+            <Label Text="♟️ Як ходять фігури" FontSize="22" FontAttributes="Bold" TextColor="White" Margin="0,10,0,0"/>
+            
+            <Label Text="• Король (♔):" TextColor="#FFD700" FontAttributes="Bold"/>
+            <Label Text="На одну клітинку в будь-який бік." TextColor="#E0E0E0"/>
+
+            <Label Text="• Ферзь (♕):" TextColor="#FFD700" FontAttributes="Bold"/>
+            <Label Text="На будь-яку кількість клітинок по вертикалі, горизонталі або діагоналі." TextColor="#E0E0E0"/>
+
+            <Label Text="• Тура (♖):" TextColor="#FFD700" FontAttributes="Bold"/>
+            <Label Text="По вертикалі та горизонталі." TextColor="#E0E0E0"/>
+
+            <Label Text="• Слон (♗):" TextColor="#FFD700" FontAttributes="Bold"/>
+            <Label Text="По діагоналях." TextColor="#E0E0E0"/>
+
+            <Label Text="• Кінь (♘):" TextColor="#FFD700" FontAttributes="Bold"/>
+            <Label Text="Літерою «Г» (2 клітинки прямо і 1 вбік). Єдина фігура, що може перестрибувати через інші." TextColor="#E0E0E0"/>
+
+            <Label Text="• Пішак (♙):" TextColor="#FFD700" FontAttributes="Bold"/>
+            <Label Text="Тільки вперед. Перший хід — на 1 або 2 клітинки, далі — по 1. Б'є по діагоналі на 1 клітинку вперед." TextColor="#E0E0E0"/>
+
+            <Label Text="✨ Спеціальні ходи" FontSize="22" FontAttributes="Bold" TextColor="White" Margin="0,10,0,0"/>
+            
+            <Label Text="• Рокировка:" FontAttributes="Bold" TextColor="White"/>
+            <Label Text="Хід королем на дві клітинки вбік і турою перестрибуючи через нього. Доступна, якщо король і тура не ходили, і між ними немає фігур." TextColor="#E0E0E0"/>
+
+            <Label Text="• Взяття на проході (En Passant):" FontAttributes="Bold" TextColor="White"/>
+            <Label Text="Якщо пішак суперника стрибнув на дві клітинки і став поруч із вашим пішаком, ви можете побити його так, ніби він пішов лише на одну." TextColor="#E0E0E0"/>
+
+            <Label Text="• Перетворення:" FontAttributes="Bold" TextColor="White"/>
+            <Label Text="Якщо пішак досягає останньої лінії, він перетворюється на будь-яку фігуру (зазвичай Ферзя)." TextColor="#E0E0E0"/>
+
+            <Button Text="Зрозуміло!" 
+                    Clicked="OnBackClicked"
+                    BackgroundColor="#4CAF50" TextColor="White"
+                    CornerRadius="20" HeightRequest="50" Margin="0,20"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
