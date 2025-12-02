@@ -15,6 +15,12 @@ namespace ChessTrainerApp.ViewModels
         [Obsolete]
         private readonly Color _selectedSquareColor = Color.FromHex("#F6F669");
 
+        // Червоний колір для шаху (не надто яскравий, ближче до "тривожного")
+        private readonly Color _checkColor = Color.FromHex("#FF6B6B"); 
+
+        // Зберігаємо клітинку короля, який зараз під шахом
+        private SquareModel _kingInCheckSquare;
+
         // Колекція для відображення дошки (9x9)
         public ObservableCollection<SquareModel> Squares { get; }
 
@@ -120,7 +126,8 @@ namespace ChessTrainerApp.ViewModels
                         Row = r,
                         Column = c,
                         SquareColor = (r + c) % 2 == 0 ? lightSquare : darkSquare,
-                        Piece = ChessBoardViewModel.GetInitialPiece(r, c)
+                        Piece = ChessBoardViewModel.GetInitialPiece(r, c),
+                        TextOpacity = IsBlindfoldMode ? 0 : 1
                     };
                     Squares.Add(square);
                 }
@@ -198,7 +205,22 @@ namespace ChessTrainerApp.ViewModels
                     UpdateSquareColor(SelectedSquare);
 
                     var moves = ChessRules.GetValidMovesForPiece(SelectedSquare, Squares, EnPassantTarget);
-                    foreach (var move in moves) move.IsPossibleMove = true;
+                    foreach (var move in moves)
+                    {
+                        // Якщо на клітинці хтось є -> це ВЗЯТТЯ (Кільце)
+                        // (Або якщо це En Passant - це теж взяття, хоча клітинка пуста, 
+                        //  але En Passant Target зазвичай обробляється окремо. 
+                        //  Для простоти: якщо клітинка пуста і це не EnPassant, то крапка)
+                        
+                        if (move.Piece.Type != PieceType.None || move == EnPassantTarget)
+                        {
+                            move.IsCaptureHint = true;
+                        }
+                        else
+                        {
+                            move.IsRegularMoveHint = true;
+                        }
+                    }
                 }
                 return;
             }
@@ -340,55 +362,50 @@ namespace ChessTrainerApp.ViewModels
         // передача ходу
         private async Task SwitchTurn()
         {
+            // --- А. Очищаємо попередній шах (перед зміною ходу) ---
+            if (_kingInCheckSquare != null)
+            {
+                var temp = _kingInCheckSquare;
+                _kingInCheckSquare = null;
+                UpdateSquareColor(temp); // Поверне звичайний колір або колір останнього ходу
+            }
+
             // Змінюємо гравця
             CurrentTurn = CurrentTurn == PieceColor.White ? PieceColor.Black : PieceColor.White;
-
             SaveState();
 
-            // чи є у нового гравця ходи?
             bool hasMoves = ChessRules.HasAnyLegalMove(CurrentTurn, Squares, EnPassantTarget);
+
+            // --- Б. Перевірка на Шах ---
+            var kingSquare = Squares.FirstOrDefault(s => s.Piece.Type == PieceType.King && s.Piece.Color == CurrentTurn);
+            var enemyColor = CurrentTurn == PieceColor.White ? PieceColor.Black : PieceColor.White;
+            
+            bool isCheck = ChessRules.IsSquareUnderAttack(kingSquare, enemyColor, Squares);
+
+            if (isCheck)
+            {
+                // 🚨 ШАХ! Фарбуємо короля в червоний
+                _kingInCheckSquare = kingSquare;
+                UpdateSquareColor(_kingInCheckSquare);
+            }
 
             if (!hasMoves)
             {
-                // ходів немає, перевірка чи це шах
-                var kingSquare = Squares.FirstOrDefault(s => s.Piece.Type == PieceType.King && s.Piece.Color == CurrentTurn);
-                var enemyColor = CurrentTurn == PieceColor.White ? PieceColor.Black : PieceColor.White;
-                
-                bool isCheck = ChessRules.IsSquareUnderAttack(kingSquare, enemyColor, Squares);
-
                 if (isCheck)
                 {
                     GameStatus = GameStatus.Checkmate;
                     GameOverMessage = $"МАТ! Перемогли {enemyColor}";
-                }
-                else
-                {
-                    GameStatus = GameStatus.Stalemate;
-                    GameOverMessage = "ПАТ! Нічия.";
-                }
-
-                IsGameOver = true;
-
-                // збереження гри
-                if (isCheck)
-                {
-                    GameStatus = GameStatus.Checkmate;
-                    GameOverMessage = $"МАТ! Перемогли {enemyColor}";
-                    
-                    // --- ЗБЕРЕЖЕННЯ ---
                     SaveGameResult(enemyColor.ToString()); 
                 }
                 else
                 {
                     GameStatus = GameStatus.Stalemate;
                     GameOverMessage = "ПАТ! Нічия.";
-                    
-                    // --- ЗБЕРЕЖЕННЯ ---
                     SaveGameResult("Draw");
                 }
+                IsGameOver = true;
             }
 
-            // перевірка чи зараз хід бота (поки що просто чорних)
             if (!IsGameOver && CurrentTurn == BotColor)
                 await BotTurn();
         }
@@ -667,7 +684,8 @@ namespace ChessTrainerApp.ViewModels
         {
             foreach (var square in Squares)
             {
-                square.IsPossibleMove = false;
+                square.IsRegularMoveHint = false;
+                square.IsCaptureHint = false;
             }
         }
     
@@ -790,19 +808,41 @@ namespace ChessTrainerApp.ViewModels
     
         private void UpdateSquareColor(SquareModel square)
         {
-            if (SelectedSquare == square)
+            // 1. ПРІОРИТЕТ: ШАХ (Найважливіше!)
+            if (square == _kingInCheckSquare)
             {
-                square.SquareColor = _selectedSquareColor; // Яскравий (Selection)
+                square.SquareColor = _checkColor;
             }
+            // 2. Пріоритет: Вибрана фігура
+            else if (SelectedSquare == square)
+            {
+                square.SquareColor = _selectedSquareColor;
+            }
+            // 3. Пріоритет: Останній хід
             else if (square == _lastFromSquare || square == _lastToSquare)
             {
-                square.SquareColor = _lastMoveColor; // Тьмяний (Last Move)
+                square.SquareColor = _lastMoveColor;
             }
+            // 4. Стандарт
             else
             {
                 bool isEven = (square.Row + square.Column) % 2 == 0;
                 square.SquareColor = isEven ? _lightSquareColor : _darkSquareColor;
             }
+        }
+
+        [RelayCommand]
+        private async Task GoToSetup()
+        {
+            // Оскільки PlayPage викликав PushAsync(new ChessBoardPage()),
+            // то PlayPage зараз "під нами" в стеку.
+            // Ми просто закриваємо поточну сторінку, і користувач опиняється в меню налаштувань.
+            
+            await Shell.Current.Navigation.PopAsync();
+            
+            // Альтернатива (якщо ти хочеш примусово відкрити нову PlayPage):
+            // await Shell.Current.Navigation.PushAsync(new PlayPage());
+            // Але PopAsync - це правильний і "чистий" спосіб для кнопки "Назад/Меню".
         }
     }
 }

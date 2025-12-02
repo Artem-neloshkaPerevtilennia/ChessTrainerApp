@@ -4,31 +4,32 @@
              xmlns:m="clr-namespace:ChessTrainerApp.Models"
              xmlns:conv="clr-namespace:ChessTrainerApp.Converters"
              x:Class="ChessTrainerApp.ChessBoardPage"
+             x:Name="ChessBoardPageRoot"
              Title="Шахова Дошка"
-             BackgroundColor="#121212"> <ContentPage.BindingContext>
+             BackgroundColor="#121212">
+
+    <ContentPage.BindingContext>
         <vm:ChessBoardViewModel />
     </ContentPage.BindingContext>
 
     <ContentPage.Resources>
         <conv:PieceColorToMauiColorConverter x:Key="PieceColorConverter" />
-        <conv:BlindfoldOpacityConverter x:Key="BlindfoldConverter" />
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto, Auto, Auto, *" 
+    <Grid RowDefinitions="Auto, *, Auto, Auto" 
           ColumnDefinitions="*"
-          Padding="0,10"
+          Padding="10,5"
           VerticalOptions="Fill" 
-          HorizontalOptions="Center">
+          HorizontalOptions="Fill">
 
         <Border Grid.Row="0" 
                 BackgroundColor="#2C2C2C" 
                 Stroke="#505050"
                 StrokeThickness="1"
                 StrokeShape="RoundRectangle 8"
-                Padding="12,8" 
-                Margin="10,0,10,10"
-                HorizontalOptions="Center"
-                WidthRequest="350">
+                Padding="10,5" 
+                Margin="0,0,0,5"
+                HorizontalOptions="Fill">
             <Grid ColumnDefinitions="*, Auto">
                 <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
                     <Label Text="🤖" FontSize="18"/>
@@ -44,53 +45,19 @@
         </Border>
 
         <Border Grid.Row="1"
-                Stroke="Gray"
+                x:Name="ChessBoardContainer" 
+                Stroke="Gray" 
                 StrokeThickness="2"
                 HorizontalOptions="Center"
                 VerticalOptions="Center">
             
-            <Grid ColumnDefinitions="*,*,*,*,*,*,*,*"
-                  RowDefinitions="*,*,*,*,*,*,*,*"
-                  WidthRequest="350"     
-                  HeightRequest="350"
-                  BackgroundColor="#EEEED2"
-                  Rotation="{Binding BoardRotation}"
-                  BindableLayout.ItemsSource="{Binding Squares}">
-                  
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="m:SquareModel">
-                        <Grid Grid.Row="{Binding Row}" Grid.Column="{Binding Column}"
-                            BackgroundColor="{Binding SquareColor}">
-                            
-                            <Grid.GestureRecognizers>
-                                <TapGestureRecognizer 
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ChessBoardViewModel}}, Path=HandleSquareClickCommand}"
-                                    CommandParameter="{Binding .}" />
-                            </Grid.GestureRecognizers>
-
-                            <Grid HorizontalOptions="Center" VerticalOptions="Center"
-                                Rotation="{Binding Source={RelativeSource AncestorType={x:Type vm:ChessBoardViewModel}}, Path=BoardRotation}">
-                                
-                                <Ellipse Fill="#80769656"
-                                        WidthRequest="22" HeightRequest="22"
-                                        IsVisible="{Binding IsPossibleMove}"
-                                        InputTransparent="True"/>
-                                
-                                <Label Text="{Binding Piece.DisplayValue}" 
-                                    FontSize="48"
-                                    FontAttributes="Bold"
-                                    HorizontalOptions="Center" 
-                                    VerticalOptions="Center"
-                                    TextColor="{Binding Piece.Color, Converter={StaticResource PieceColorConverter}}"
-                                    InputTransparent="True"
-                                    
-                                    Opacity="{Binding Source={RelativeSource AncestorType={x:Type vm:ChessBoardViewModel}}, Path=IsBlindfoldMode, Converter={StaticResource BlindfoldConverter}}"/>
-                            </Grid>
-
-                        </Grid>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </Grid>
+            <Grid x:Name="BoardGrid"
+                ColumnDefinitions="*,*,*,*,*,*,*,*"
+                RowDefinitions="*,*,*,*,*,*,*,*"
+                BackgroundColor="#EEEED2"
+                Rotation="{Binding BoardRotation}">
+                
+                </Grid>
         </Border>
 
         <Border Grid.Row="2" 
@@ -98,10 +65,9 @@
                 Stroke="#505050"
                 StrokeThickness="1"
                 StrokeShape="RoundRectangle 8"
-                Padding="12,8" 
-                Margin="10,10,10,5"
-                HorizontalOptions="Center"
-                WidthRequest="350">
+                Padding="10,5" 
+                Margin="0,5,0,5"
+                HorizontalOptions="Fill">
             <Grid ColumnDefinitions="*, Auto">
                 <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
                     <Label Text="👤" FontSize="18"/>
@@ -116,52 +82,41 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="3" RowDefinitions="Auto, *" Margin="10,5,10,10" WidthRequest="350" HorizontalOptions="Center">
+        <VerticalStackLayout Grid.Row="3" Spacing="5" Margin="0,0,0,10">
             
-            <Grid Grid.Row="0" ColumnDefinitions="*, Auto, Auto, *" ColumnSpacing="10" Margin="0,0,0,10">
-    
+            <Grid ColumnDefinitions="*, Auto, Auto, *" ColumnSpacing="8" HeightRequest="45">
+ 
                 <Button Grid.Column="0" 
-                        Text="🠔" 
+                        Text="◀" 
                         Command="{Binding PreviousMoveCommand}"
-                        BackgroundColor="#3E3E3E" 
-                        TextColor="White"
-                        CornerRadius="8"
-                        HeightRequest="45"/>
-
+                        BackgroundColor="#3E3E3E" TextColor="White"
+                        CornerRadius="8"/>
+                               
                 <Button Grid.Column="1" 
-                    Text="↩️" 
-                    Command="{Binding UndoLastMoveCommand}"
-                    IsVisible="{Binding IsTrainingMode}" 
-                    BackgroundColor="#FF9800" 
-                    TextColor="White"
-                    CornerRadius="8"
-                    HeightRequest="45"
-                    WidthRequest="50"/>
-                
+                        Text="↩️" 
+                        Command="{Binding UndoLastMoveCommand}"
+                        IsVisible="{Binding IsTrainingMode}"
+                        BackgroundColor="#FF9800" TextColor="White"
+                        CornerRadius="8" WidthRequest="50" Padding="0"/>
+
                 <Button Grid.Column="2" 
-                        Text="🏳️ Здатися" 
+                        Text="🏳️" 
                         Command="{Binding ResignGameCommand}"
-                        BackgroundColor="#D32F2F" 
-                        TextColor="White"
-                        FontAttributes="Bold"
-                        CornerRadius="8"
-                        HeightRequest="45"
-                        WidthRequest="100"/>
+                        BackgroundColor="#D32F2F" TextColor="White"
+                        CornerRadius="8" WidthRequest="50" Padding="0"/>
                 
                 <Button Grid.Column="3" 
-                        Text="🠖" 
+                        Text="▶" 
                         Command="{Binding NextMoveCommand}"
-                        BackgroundColor="#3E3E3E" 
-                        TextColor="White"
-                        CornerRadius="8"
-                        HeightRequest="45"/>
+                        BackgroundColor="#3E3E3E" TextColor="White"
+                        CornerRadius="8"/>
             </Grid>
 
-            <Border Grid.Row="1"
-                    BackgroundColor="#1E1E1E" 
+            <Border BackgroundColor="#1E1E1E" 
                     Stroke="#333"
                     StrokeShape="RoundRectangle 8"
                     Padding="10" 
+                    HeightRequest="80" 
                     VerticalOptions="Fill"> 
                 <ScrollView>
                     <Label Text="{Binding PgnText}" 
@@ -170,9 +125,9 @@
                            LineBreakMode="WordWrap"/>
                 </ScrollView>
             </Border>
-        </Grid>
+        </VerticalStackLayout>
 
-        <BoxView Color="Black" Opacity="0.8" 
+        <BoxView Color="Black" Opacity="0.85" 
                  IsVisible="{Binding IsGameOver}" 
                  Grid.Row="0" Grid.RowSpan="4" 
                  InputTransparent="False"/>
@@ -186,9 +141,9 @@
                    TextColor="White" FontSize="32" FontAttributes="Bold" 
                    HorizontalTextAlignment="Center"/>
 
-            <Button Text="Нова Гра" Command="{Binding RestartGameCommand}" 
+            <Button Text="🔄 Грати знову" Command="{Binding GoToSetupCommand}" 
                     BackgroundColor="#4CAF50" TextColor="White" 
-                    WidthRequest="200" HeightRequest="60"
+                    WidthRequest="220" HeightRequest="60"
                     CornerRadius="30" FontSize="18" FontAttributes="Bold"/>
         </VerticalStackLayout>
     </Grid>
