@@ -4,6 +4,12 @@
         <name>ChessTrainerApp</name>
     </assembly>
     <members>
+        <member name="T:ChessTrainerApp.Models.PgnMoveModel">
+            <inheritdoc/>
+        </member>
+        <member name="P:ChessTrainerApp.Models.PgnMoveModel.IsSelected">
+            <inheritdoc cref="F:ChessTrainerApp.Models.PgnMoveModel.isSelected"/>
+        </member>
         <member name="T:ChessTrainerApp.Models.SquareModel">
             <inheritdoc/>
         </member>
@@ -21,6 +27,15 @@
         </member>
         <member name="P:ChessTrainerApp.Models.SquareModel.IsCaptureHint">
             <inheritdoc cref="F:ChessTrainerApp.Models.SquareModel.isCaptureHint"/>
+        </member>
+        <member name="T:ChessTrainerApp.ViewModels.ArchiveViewModel">
+            <inheritdoc/>
+        </member>
+        <member name="F:ChessTrainerApp.ViewModels.ArchiveViewModel.copyPgnCommand">
+            <summary>The backing field for <see cref="P:ChessTrainerApp.ViewModels.ArchiveViewModel.CopyPgnCommand"/>.</summary>
+        </member>
+        <member name="P:ChessTrainerApp.ViewModels.ArchiveViewModel.CopyPgnCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand`1"/> instance wrapping <see cref="M:ChessTrainerApp.ViewModels.ArchiveViewModel.CopyPgn(System.String)"/>.</summary>
         </member>
         <member name="T:ChessTrainerApp.ViewModels.ChessBoardViewModel">
             <inheritdoc/>
@@ -147,6 +162,9 @@
             for all properties generated with <see cref="T:CommunityToolkit.Mvvm.ComponentModel.ObservablePropertyAttribute"/>.
             </summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsSelected">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsSelected" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.Piece">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "Piece" generated properties.</summary>
         </member>
@@ -224,6 +242,9 @@
             A helper type providing cached, reusable <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instances
             for all properties generated with <see cref="T:CommunityToolkit.Mvvm.ComponentModel.ObservablePropertyAttribute"/>.
             </summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsSelected">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsSelected" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.Piece">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "Piece" generated properties.</summary>

@@ -275,7 +275,7 @@ public static class ChessRules
         foreach (var toSquare in board)
         {
             // Використовуємо твій існуючий метод перевірки
-            if (IsMoveValid(fromSquare, toSquare, new ObservableCollection<SquareModel>(board), enPassantTarget))
+            if (IsMoveValid(fromSquare, toSquare, board, enPassantTarget))
             {
                 validMoves.Add(toSquare);
             }

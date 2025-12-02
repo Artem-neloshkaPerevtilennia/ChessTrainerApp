@@ -1,26 +1,27 @@
 using System.Collections.ObjectModel;
-using ChessTrainerApp.Models;
+using ChessTrainerApp.Services;
 
 namespace ChessTrainerApp.Models;
 
 public static class ChessAI
 {
+    private const int MATE_SCORE = 100000;
+
     // Вартість фігур
     private static int GetPieceValue(PieceType type)
     {
         return type switch
         {
-            PieceType.Pawn => 10,
-            PieceType.Knight => 30,
-            PieceType.Bishop => 30,
-            PieceType.Rook => 50,
-            PieceType.Queen => 90,
-            PieceType.King => 900,
+            PieceType.Pawn => 100,
+            PieceType.Knight => 320,
+            PieceType.Bishop => 330,
+            PieceType.Rook => 500,
+            PieceType.Queen => 900,
+            PieceType.King => 20000,
             _ => 0
         };
     }
 
-    // Оцінка всієї дошки: (Мої бали) - (Бали ворога)
     public static int EvaluateBoard(IList<SquareModel> board, PieceColor botColor)
     {
         int score = 0;
@@ -30,76 +31,104 @@ public static class ChessAI
 
             int value = GetPieceValue(square.Piece.Type);
 
-            // Додаткові бали за позицію (центр)
-            if (square.Piece.Type == PieceType.Pawn || square.Piece.Type == PieceType.Knight)
-            {
-                // Якщо фігура в центрі (квадрат d4-e5), даємо трохи бонусів
-                if (square.Row > 2 && square.Row < 5 && square.Column > 2 && square.Column < 5)
-                    value += 1; // Заохочуємо контроль центру
-            }
+            // Позиційні таблиці (з попереднього уроку)
+            int index = square.Row * 8 + square.Column;
+            int tableIndex = square.Piece.Color == PieceColor.White ? (7 - square.Row) * 8 + square.Column : index;
+            int positionBonus = 0;
 
-            if (square.Piece.Color == botColor)
-                score += value;
-            else
-                score -= value;
+            switch (square.Piece.Type)
+            {
+                case PieceType.Pawn: positionBonus = EvaluationTables.PawnTable[tableIndex]; break;
+                case PieceType.Knight: positionBonus = EvaluationTables.KnightTable[tableIndex]; break;
+                case PieceType.Bishop: positionBonus = EvaluationTables.BishopTable[tableIndex]; break;
+                case PieceType.Rook: positionBonus = EvaluationTables.RookTable[tableIndex]; break;
+                case PieceType.Queen: positionBonus = EvaluationTables.QueenTable[tableIndex]; break;
+                case PieceType.King: positionBonus = EvaluationTables.KingMiddleGameTable[tableIndex]; break;
+            }
+            value += positionBonus;
+
+            if (square.Piece.Color == botColor) score += value;
+            else score -= value;
         }
         return score;
     }
 
-    // Головний метод
-    public static Move? GetBestMove(IList<SquareModel> board, PieceColor botColor, int depth, SquareModel enPassantTarget)
+    public static Move? GetBestMove(IList<SquareModel> originalBoard, PieceColor botColor, int maxDepth, SquareModel enPassantTarget)
     {
+        int pieceCount = originalBoard.Count(s => s.Piece.Type != PieceType.None);
+        if (pieceCount >= 32) maxDepth = 2; // Прискорення дебюту
+
         Move? bestMove = null;
-        int alpha = int.MinValue;
-        int beta = int.MaxValue;
-        
-        // Отримуємо всі ходи
-        var possibleMoves = ChessRules.GetAllLegalMoves(botColor, new ObservableCollection<SquareModel>(board), enPassantTarget);
-        
-        // ОПТИМІЗАЦІЯ 1: Сортування ходів
-        // Спочатку перевіряємо взяття фігур - це збільшує шанс швидкого відсікання
-        possibleMoves = OrderMoves(possibleMoves);
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        long timeLimitMs = 2500; // Даємо 2.5 сек на роздуми
 
-        // Якщо ходів немає - повертаємо null (пат/мат)
-        if (possibleMoves.Count == 0) return null;
-
-        foreach (var move in possibleMoves)
+        for (int currentDepth = 1; currentDepth <= maxDepth; currentDepth++)
         {
-            var capturedPiece = SimulateMove(move);
+            if (stopwatch.ElapsedMilliseconds > timeLimitMs && bestMove != null) break;
 
-            // Викликаємо Minimax з Alpha-Beta
-            // false = хід мінімізатора (ворога)
-            int boardValue = Minimax(board, depth - 1, alpha, beta, false, botColor, enPassantTarget);
+            Move? currentDepthBestMove = null;
+            int globalBestValue = int.MinValue;
+            object lockObj = new object();
 
-            UndoMove(move, capturedPiece);
+            var possibleMoves = ChessRules.GetAllLegalMoves(botColor, new List<SquareModel>(originalBoard), enPassantTarget);
+            
+            // Сортуємо ходи перед розподілом потоків
+            possibleMoves = OrderMoves(possibleMoves, originalBoard, botColor); 
 
-            if (boardValue > alpha)
+            if (possibleMoves.Count == 0) break;
+
+            Parallel.ForEach(possibleMoves, (move, state) =>
             {
-                alpha = boardValue;
-                bestMove = move;
+                if (stopwatch.ElapsedMilliseconds > timeLimitMs) state.Stop();
+
+                var localBoard = DeepCloneBoard(originalBoard);
+                var localMove = MapMoveToBoard(move, localBoard);
+                
+                SquareModel localEnPassant = null;
+                if (enPassantTarget != null)
+                    localEnPassant = localBoard[enPassantTarget.Row * 8 + enPassantTarget.Column];
+
+                var capturedPiece = SimulateMove(localMove);
+
+                int boardValue = Minimax(localBoard, currentDepth - 1, int.MinValue, int.MaxValue, false, botColor, localEnPassant);
+
+                UndoMove(localMove, capturedPiece);
+
+                lock (lockObj)
+                {
+                    if (boardValue > globalBestValue)
+                    {
+                        globalBestValue = boardValue;
+                        currentDepthBestMove = move;
+                    }
+                }
+            });
+
+            if (stopwatch.ElapsedMilliseconds <= timeLimitMs || bestMove == null)
+            {
+                bestMove = currentDepthBestMove;
             }
         }
-
         return bestMove;
     }
 
-    // Рекурсивна функція з Alpha-Beta
     private static int Minimax(IList<SquareModel> board, int depth, int alpha, int beta, bool isMaximizingPlayer, PieceColor botColor, SquareModel enPassantTarget)
     {
-        if (depth == 0)
+        PieceColor currentPlayer = isMaximizingPlayer ? botColor : (botColor == PieceColor.White ? PieceColor.Black : PieceColor.White);
+        var possibleMoves = ChessRules.GetAllLegalMoves(currentPlayer, board, enPassantTarget);
+
+        if (possibleMoves.Count == 0)
         {
-            return EvaluateBoard(board, botColor);
+            if (IsKingInCheck(currentPlayer, board))
+                return isMaximizingPlayer ? -MATE_SCORE - depth : MATE_SCORE + depth;
+            return 0;
         }
 
-        PieceColor currentPlayer = isMaximizingPlayer ? botColor : (botColor == PieceColor.White ? PieceColor.Black : PieceColor.White);
-        
-        // Тут потрібен cast до ObservableCollection для ChessRules, або зміни ChessRules на IList
-        var possibleMoves = ChessRules.GetAllLegalMoves(currentPlayer, new ObservableCollection<SquareModel>(board), enPassantTarget);
+        if (depth == 0) return EvaluateBoard(board, botColor);
 
-        if (possibleMoves.Count == 0) return EvaluateBoard(board, botColor);
-
-        // Сортуємо ходи для ефективності
-        possibleMoves = OrderMoves(possibleMoves);
+        // 🧠 СОРТУВАННЯ ХОДІВ (Твій запит)
+        // Ми сортуємо і тут, всередині рекурсії, щоб прискорити відсікання
+        possibleMoves = OrderMoves(possibleMoves, board, currentPlayer);
 
         if (isMaximizingPlayer)
         {
@@ -109,12 +138,9 @@ public static class ChessAI
                 var captured = SimulateMove(move);
                 int eval = Minimax(board, depth - 1, alpha, beta, false, botColor, enPassantTarget);
                 UndoMove(move, captured);
-
                 maxEval = Math.Max(maxEval, eval);
                 alpha = Math.Max(alpha, eval);
-
-                // ВІДСІКАННЯ (Pruning)
-                if (beta <= alpha) break; 
+                if (beta <= alpha) break;
             }
             return maxEval;
         }
@@ -126,21 +152,84 @@ public static class ChessAI
                 var captured = SimulateMove(move);
                 int eval = Minimax(board, depth - 1, alpha, beta, true, botColor, enPassantTarget);
                 UndoMove(move, captured);
-
                 minEval = Math.Min(minEval, eval);
                 beta = Math.Min(beta, eval);
-
-                // ВІДСІКАННЯ (Pruning)
                 if (beta <= alpha) break;
             }
             return minEval;
         }
     }
 
-    // ОПТИМІЗАЦІЯ: Спочатку перевіряємо ходи, де ми когось їмо
-    private static List<Move> OrderMoves(List<Move> moves)
+    // 🔥 ГОЛОВНА ФІШКА: ПРІОРИТЕТНІСТЬ ХОДІВ 🔥
+    private static List<Move> OrderMoves(List<Move> moves, IList<SquareModel> board, PieceColor attackerColor)
     {
-        return moves.OrderByDescending(m => m.To.Piece.Type != PieceType.None ? 10 : 0).ToList();
+        // Ми присвоюємо кожному ходу бал "цікавості". Чим більше - тим раніше перевіряємо.
+        return moves.OrderByDescending(move => 
+        {
+            int score = 0;
+
+            // 1. ВЗЯТТЯ (Captures) - MVV-LVA
+            // Найцінніша жертва найменшою ціною.
+            if (move.To.Piece.Type != PieceType.None)
+            {
+                score += 10 * GetPieceValue(move.To.Piece.Type) - GetPieceValue(move.From.Piece.Type);
+            }
+
+            // 2. ПЕРЕТВОРЕННЯ (Promotion)
+            if (move.From.Piece.Type == PieceType.Pawn && (move.To.Row == 0 || move.To.Row == 7))
+            {
+                score += 900; // Це майже як отримати ферзя
+            }
+
+            // 3. ШАХ (Checks) - Це те, що ти просив!
+            // Нам треба симулювати хід, щоб дізнатися, чи це шах.
+            // Це трохи дорого, тому робимо це швидко.
+            var captured = SimulateMove(move);
+            var enemyColor = attackerColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
+            if (IsKingInCheck(enemyColor, board))
+            {
+                score += 5000; // Шах має ВЕЛИЧЕЗНИЙ пріоритет (вище за звичайні взяття)
+            }
+            UndoMove(move, captured);
+
+            // 4. НАПАДИ (Attacks) - Спрощено
+            // Якщо ми ставимо фігуру на позицію, яка вважається сильною (за EvaluationTables)
+            // (Це частково покриває "напади", бо таблиці заохочують активні поля)
+            
+            return score;
+        }).ToList();
+    }
+
+    private static bool IsKingInCheck(PieceColor kingColor, IList<SquareModel> board)
+    {
+        var kingSquare = board.FirstOrDefault(s => s.Piece.Type == PieceType.King && s.Piece.Color == kingColor);
+        if (kingSquare == null) return true;
+        
+        var enemyColor = kingColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
+        return ChessRules.IsSquareUnderAttack(kingSquare, enemyColor, board);
+    }
+
+    private static List<SquareModel> DeepCloneBoard(IList<SquareModel> original)
+    {
+        var clone = new List<SquareModel>(64);
+        foreach (var sq in original)
+        {
+            clone.Add(new SquareModel
+            {
+                Row = sq.Row, Column = sq.Column, SquareColor = sq.SquareColor,
+                Piece = new PieceModel { Type = sq.Piece.Type, Color = sq.Piece.Color, HasMoved = sq.Piece.HasMoved }
+            });
+        }
+        return clone;
+    }
+
+    private static Move MapMoveToBoard(Move originalMove, IList<SquareModel> targetBoard)
+    {
+        return new Move 
+        { 
+            From = targetBoard[originalMove.From.Row * 8 + originalMove.From.Column],
+            To = targetBoard[originalMove.To.Row * 8 + originalMove.To.Column]
+        };
     }
 
     private static PieceModel SimulateMove(Move move)

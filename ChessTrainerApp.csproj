@@ -21,7 +21,7 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>ChessTrainerApp</ApplicationTitle>
+		<ApplicationTitle>Knightmare</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.chesstrainerapp</ApplicationId>
