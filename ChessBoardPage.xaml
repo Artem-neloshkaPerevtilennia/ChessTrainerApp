@@ -113,18 +113,50 @@
             </Grid>
 
             <Border BackgroundColor="#1E1E1E" 
-                    Stroke="#333"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="10" 
-                    HeightRequest="80" 
-                    VerticalOptions="Fill"> 
-                <ScrollView>
-                    <Label Text="{Binding PgnText}" 
-                           TextColor="#B0B0B0" 
-                           FontSize="14"
-                           LineBreakMode="WordWrap"/>
-                </ScrollView>
-            </Border>
+                Stroke="#333"
+                StrokeShape="RoundRectangle 8"
+                Padding="5" 
+                HeightRequest="60" 
+                VerticalOptions="Fill"> 
+
+            <CollectionView ItemsSource="{Binding PgnList}"
+                            ItemsLayout="HorizontalList"
+                            HorizontalScrollBarVisibility="Never">
+                
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="m:PgnMoveModel">
+                        
+                        <Border StrokeThickness="0"
+                                StrokeShape="RoundRectangle 5"
+                                Padding="10,5"
+                                Margin="2,5"
+                                VerticalOptions="Center">
+                            
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="White"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="Transparent"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+
+                            <Label Text="{Binding Text}" FontSize="16" FontAttributes="Bold">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                        <Setter Property="TextColor" Value="Black"/>
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="False">
+                                        <Setter Property="TextColor" Value="#B0B0B0"/>
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                            
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Border>
         </VerticalStackLayout>
 
         <BoxView Color="Black" Opacity="0.85" 

@@ -38,8 +38,7 @@ namespace ChessTrainerApp.ViewModels
         private bool isGameOver = false;
 
         // запис партії, що відображатиметься під дошкою
-        [ObservableProperty]
-        private string pgnText = "";
+        public ObservableCollection<PgnMoveModel> PgnList { get; } = new();
         
         // ходи у партії
         public List<string> MoveHistory { get; set; } = new List<string>();
@@ -140,7 +139,7 @@ namespace ChessTrainerApp.ViewModels
             // Очищаємо історію при новій грі
             _history.Clear();
             _currentMoveIndex = -1;
-            PgnText = "";
+            RefreshPgnVisuals();
             MoveHistory.Clear();
             
             // Зберігаємо початковий стан (хід 0)
@@ -395,6 +394,7 @@ namespace ChessTrainerApp.ViewModels
             // Змінюємо гравця
             CurrentTurn = CurrentTurn == PieceColor.White ? PieceColor.Black : PieceColor.White;
             SaveState();
+            RefreshPgnVisuals();
 
             bool hasMoves = ChessRules.HasAnyLegalMove(CurrentTurn, Squares, EnPassantTarget);
 
@@ -579,26 +579,23 @@ namespace ChessTrainerApp.ViewModels
                 pgnMove = $"{pieceNotation}{captureNotation}{destination}";
             }
             
-            // Якщо зараз ходять білі - додаємо номер ходу
-            if (CurrentTurn == PieceColor.White)
+            // Якщо ми повернулися в минуле і робимо новий хід - видаляємо майбутнє
+            if (_currentMoveIndex < MoveHistory.Count - 1)
             {
-                int moveNumber = (MoveHistory.Count / 2) + 1;
-                PgnText += $"{moveNumber}. {pgnMove} ";
-            }
-            // Якщо зараз ходять чорні - просто додаємо хід
-            else
-            {
-                PgnText += $"{pgnMove} ";
+                MoveHistory.RemoveRange(_currentMoveIndex + 1, MoveHistory.Count - (_currentMoveIndex + 1));
             }
 
-            // Додаємо в список (для внутрішньої логіки)
+            // Додаємо новий хід
             MoveHistory.Add(pgnMove);
+            
+            // ОНОВЛЮЄМО ВІЗУАЛКУ (Викликаємо наш новий метод)
+            RefreshPgnVisuals();
         }
     
         // збереження гри
         private async void SaveGameResult(string winner)
         {
-            string pgnString = PgnText; 
+            string pgnString = string.Join(" ", PgnList.Select(m => m.Text));; 
 
             var record = new GameRecord
             {
@@ -645,6 +642,7 @@ namespace ChessTrainerApp.ViewModels
             {
                 _currentMoveIndex--;
                 LoadState(_history[_currentMoveIndex]);
+                RefreshPgnVisuals();
             }
         }
         
@@ -655,6 +653,7 @@ namespace ChessTrainerApp.ViewModels
             {
                 _currentMoveIndex++;
                 LoadState(_history[_currentMoveIndex]);
+                RefreshPgnVisuals();
             }
         }
 
@@ -694,7 +693,6 @@ namespace ChessTrainerApp.ViewModels
                 PositionHash = GetPositionSignature(), 
 
                 // 👇 ДЛЯ PGN (Текстова версія)
-                PgnText = PgnText,
                 MoveHistory = new List<string>(MoveHistory),
 
                 // 👇 ДЛЯ ПІДСВІТКИ (Жовтий колір)
@@ -766,8 +764,9 @@ namespace ChessTrainerApp.ViewModels
             
             // Оновлення матеріалу
             UpdateMaterialBalance();
+            RefreshPgnVisuals();
         }
-        
+
         // вимикаємо всі зелені кружечки
         private void ClearPossibleMoves()
         {
@@ -862,7 +861,7 @@ namespace ChessTrainerApp.ViewModels
 
             int statesToRemove = (BotColor != PieceColor.None) ? 2 : 1;
 
-            if (_history.Count <= statesToRemove) return;
+            if (_history.Count < statesToRemove) return;
 
             // 1. ВІЗУАЛЬНА ЧИСТКА
             if (_lastFromSquare != null) ResetSquareColor(_lastFromSquare);
@@ -887,28 +886,14 @@ namespace ChessTrainerApp.ViewModels
                 }
             }
 
-            // Оновлюємо текст на екрані
-            RebuildPgnText(); 
-
             // 3. ЗАВАНТАЖЕННЯ СТАРОГО СТАНУ
             _currentMoveIndex = _history.Count - 1;
             LoadState(_history[_currentMoveIndex]);
 
             IsGameOver = false;
             GameStatus = GameStatus.InProgress;
-        }
 
-        private void RebuildPgnText()
-        {
-            var sb = new System.Text.StringBuilder();
-            for (int i = 0; i < MoveHistory.Count; i++)
-            {
-                if (i % 2 == 0)
-                    sb.Append($"{(i / 2) + 1}. {MoveHistory[i]} ");
-                else
-                    sb.Append($"{MoveHistory[i]} ");
-            }
-            PgnText = sb.ToString();
+            RefreshPgnVisuals();
         }
 
         private void UpdateSquareColor(SquareModel square)
@@ -981,6 +966,36 @@ namespace ChessTrainerApp.ViewModels
                 sb.Append($"|EP:{EnPassantTarget.PositionName}");
 
             return sb.ToString();
+        }
+    
+        private void RefreshPgnVisuals()
+        {
+            // Робимо це в головному потоці, щоб UI не лаявся
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                PgnList.Clear();
+
+                for (int i = 0; i < MoveHistory.Count; i++)
+                {
+                    string moveText = MoveHistory[i];
+                    string displayText;
+
+                    // Форматуємо: "1. e4" або "e5"
+                    if (i % 2 == 0) displayText = $"{(i / 2) + 1}. {moveText}";
+                    else displayText = moveText;
+
+                    var item = new PgnMoveModel
+                    {
+                        Text = displayText,
+                        // Якщо індекс співпадає з поточним ходом -> виділяємо
+                        IsSelected = (i == _currentMoveIndex - 1) 
+                    };
+
+                    PgnList.Add(item);
+                }
+                
+                // (Опціонально) Автоскрол можна додати в Code-behind, але поки так
+            });
         }
     }
 }
