@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ChessTrainerApp.Models;
+using ChessTrainerApp.Services;
 using CommunityToolkit.Mvvm.Input;
 
 namespace ChessTrainerApp.ViewModels
@@ -95,6 +96,9 @@ namespace ChessTrainerApp.ViewModels
         // Зберігаємо посилання на клітинки останнього ходу
         private SquareModel _lastFromSquare;
         private SquareModel _lastToSquare;
+
+        // Лічильник півходів без взяття/ходу пішака
+        private int _halfMoveClock = 0;
 
         // --- У КОНСТРУКТОРІ ---
         public ChessBoardViewModel()
@@ -211,7 +215,7 @@ namespace ChessTrainerApp.ViewModels
                         // (Або якщо це En Passant - це теж взяття, хоча клітинка пуста, 
                         //  але En Passant Target зазвичай обробляється окремо. 
                         //  Для простоти: якщо клітинка пуста і це не EnPassant, то крапка)
-                        
+                        Console.WriteLine($"[DEBUG] Підсвічую хід на: {move.PositionName}");
                         if (move.Piece.Type != PieceType.None || move == EnPassantTarget)
                         {
                             move.IsCaptureHint = true;
@@ -269,6 +273,24 @@ namespace ChessTrainerApp.ViewModels
             // 1. Зберігаємо посилання на старі підсвічені клітинки
             var prevFrom = _lastFromSquare;
             var prevTo = _lastToSquare;
+
+            bool isPawnMove = from.Piece.Type == PieceType.Pawn;
+            bool isCapture = to.Piece.Type != PieceType.None;
+
+            // Взяття на проході - це теж взяття
+            if (from.Piece.Type == PieceType.Pawn && from.Column != to.Column && to.Piece.Type == PieceType.None)
+            {
+                isCapture = true;
+            }
+
+            if (isPawnMove || isCapture)
+            {
+                _halfMoveClock = 0; // Скидаємо лічильник (подія незворотна)
+            }
+            else
+            {
+                _halfMoveClock++; // Нарощуємо лічильник
+            }
 
             // 2. Оновлюємо глобальні змінні на НОВИЙ хід
             _lastFromSquare = from;
@@ -376,6 +398,34 @@ namespace ChessTrainerApp.ViewModels
 
             bool hasMoves = ChessRules.HasAnyLegalMove(CurrentTurn, Squares, EnPassantTarget);
 
+            if (_halfMoveClock >= 100)
+            {
+                GameStatus = GameStatus.Draw;
+                GameOverMessage = "½ - ½\nНічия (Правило 50 ходів)";
+                IsGameOver = true;
+                SaveGameResult("Draw");
+                return; // Виходимо
+            }
+
+            // 2. ПЕРЕВІРКА: ТРИРАЗОВЕ ПОВТОРЕННЯ
+            string currentHash = GetPositionSignature();
+            
+            // Рахуємо, скільки разів цей хеш зустрічається в історії
+            int repetitionCount = _history.Count(state => state.PositionHash == currentHash);
+
+            // Додаємо +1, бо поточний стан ми могли ще не встигнути додати в історію 
+            // (залежить від того, де ти викликаєш SaveState - до чи після перевірки).
+            // Якщо SaveState викликається на початку SwitchTurn (як ми робили), то він вже в історії.
+            
+            if (repetitionCount >= 3)
+            {
+                GameStatus = GameStatus.Draw;
+                GameOverMessage = "½ - ½\nНічия (Триразове повторення)";
+                IsGameOver = true;
+                SaveGameResult("Draw");
+                return;
+            }
+
             // --- Б. Перевірка на Шах ---
             var kingSquare = Squares.FirstOrDefault(s => s.Piece.Type == PieceType.King && s.Piece.Color == CurrentTurn);
             var enemyColor = CurrentTurn == PieceColor.White ? PieceColor.Black : PieceColor.White;
@@ -412,9 +462,8 @@ namespace ChessTrainerApp.ViewModels
 
         private void ResetSquareColor(SquareModel square)
         {
-            // Повертаємо оригінальний колір (зелений або кремовий)
-            // Тобі треба буде винести логіку визначення кольору в окремий метод або зберігати оригінальний колір
             bool isEven = (square.Row + square.Column) % 2 == 0;
+            // Використовуй свої змінні кольорів
             square.SquareColor = isEven ? _lightSquareColor : _darkSquareColor;
         }
     
@@ -587,15 +636,6 @@ namespace ChessTrainerApp.ViewModels
                 });
             }
         }
-
-        public class GameState
-        {
-            public PieceModel[] BoardSnapshot { get; set; } // Масив фігур
-            public PieceColor Turn { get; set; }            // Чий хід
-            public SquareModel EnPassantTarget { get; set; } // Ціль для взяття
-            public string PgnText { get; set; }             // Текст історії
-            public List<string> MoveHistory { get; set; }   // Список ходів
-        }
     
         // --- МЕТОДИ НАВІГАЦІЇ ---
         [RelayCommand]
@@ -607,6 +647,7 @@ namespace ChessTrainerApp.ViewModels
                 LoadState(_history[_currentMoveIndex]);
             }
         }
+        
         [RelayCommand]
         private void GoToNextMove()
         {
@@ -628,7 +669,7 @@ namespace ChessTrainerApp.ViewModels
                 _history.RemoveRange(_currentMoveIndex + 1, _history.Count - (_currentMoveIndex + 1));
             }
 
-            // 2. Створюємо глибоку копію фігур (щоб вони не змінювались за посиланням)
+            // 2. Створюємо глибоку копію фігур
             var piecesCopy = new PieceModel[64];
             for (int i = 0; i < 64; i++)
             {
@@ -647,8 +688,18 @@ namespace ChessTrainerApp.ViewModels
                 BoardSnapshot = piecesCopy,
                 Turn = CurrentTurn,
                 EnPassantTarget = EnPassantTarget,
+                
+                // 👇 ДЛЯ ПРАВИЛ НІЧИЄЇ
+                HalfMoveClock = _halfMoveClock,
+                PositionHash = GetPositionSignature(), 
+
+                // 👇 ДЛЯ PGN (Текстова версія)
                 PgnText = PgnText,
-                MoveHistory = new List<string>(MoveHistory) // Копіюємо список
+                MoveHistory = new List<string>(MoveHistory),
+
+                // 👇 ДЛЯ ПІДСВІТКИ (Жовтий колір)
+                LastFromIndex = _lastFromSquare != null ? (_lastFromSquare.Row * 8 + _lastFromSquare.Column) : -1,
+                LastToIndex = _lastToSquare != null ? (_lastToSquare.Row * 8 + _lastToSquare.Column) : -1
             };
 
             _history.Add(state);
@@ -657,28 +708,66 @@ namespace ChessTrainerApp.ViewModels
 
         private void LoadState(GameState state)
         {
-            // Відновлюємо фігури на дошці
+            // 1. ВІДНОВЛЕННЯ ФІГУР
             for (int i = 0; i < 64; i++)
             {
-                // Оновлюємо властивості існуючих об'єктів SquareModel
-                // Це важливо, щоб UI відреагував (Binding)
                 Squares[i].Piece = state.BoardSnapshot[i];
             }
 
-            // Відновлюємо змінні
+            // 2. ВІДНОВЛЕННЯ ЗМІННИХ
             CurrentTurn = state.Turn;
             EnPassantTarget = state.EnPassantTarget;
-            PgnText = state.PgnText;
-            MoveHistory = new List<string>(state.MoveHistory);
-            
-            // Скидаємо виділення
+            _halfMoveClock = state.HalfMoveClock;
+
+            // 3. 🧹 ОЧИЩЕННЯ СТАРОЇ ПІДСВІТКИ (Критично важливо!)
+            // Ми скидаємо колір тим клітинкам, які були жовтими СЕКУНДУ ТОМУ
+            if (_lastFromSquare != null) ResetSquareColor(_lastFromSquare);
+            if (_lastToSquare != null) ResetSquareColor(_lastToSquare);
+            if (_kingInCheckSquare != null) ResetSquareColor(_kingInCheckSquare);
+
+            // 4. ВІДНОВЛЕННЯ ПІДСВІТКИ З ІСТОРІЇ
+            if (state.LastFromIndex != -1 && state.LastToIndex != -1)
+            {
+                // Знаходимо клітинки за збереженими індексами
+                _lastFromSquare = Squares[state.LastFromIndex];
+                _lastToSquare = Squares[state.LastToIndex];
+
+                // Фарбуємо їх у жовтий
+                UpdateSquareColor(_lastFromSquare);
+                UpdateSquareColor(_lastToSquare);
+            }
+            else
+            {
+                // Це початок гри, підсвітки немає
+                _lastFromSquare = null;
+                _lastToSquare = null;
+            }
+
+            // Відновлення червоного короля (якщо в цьому стані був шах)
+            var kingSquare = Squares.FirstOrDefault(s => s.Piece.Type == PieceType.King && s.Piece.Color == CurrentTurn);
+            var enemyColor = CurrentTurn == PieceColor.White ? PieceColor.Black : PieceColor.White;
+            if (kingSquare != null && ChessRules.IsSquareUnderAttack(kingSquare, enemyColor, Squares))
+            {
+                _kingInCheckSquare = kingSquare;
+                UpdateSquareColor(_kingInCheckSquare);
+            }
+            else
+            {
+                _kingInCheckSquare = null;
+            }
+
+            // 5. Скидання виділення курсора
             if (SelectedSquare != null)
             {
                 ResetSquareColor(SelectedSquare);
                 SelectedSquare = null;
+                ClearPossibleMoves();
             }
+            
+            // Оновлення матеріалу
+            UpdateMaterialBalance();
         }
-    
+        
         // вимикаємо всі зелені кружечки
         private void ClearPossibleMoves()
         {
@@ -768,44 +857,60 @@ namespace ChessTrainerApp.ViewModels
         [RelayCommand]
         private void UndoLastMove()
         {
-            // Перевірки:
-            // 1. Гра має тривати (або закінчитися, якщо ми зівнули мат і хочемо переходити)
-            // 2. Це має бути Навчальний режим
-            // 3. Має бути хоча б 2 записи в історії (Старт -> Мій Хід -> Хід Бота) = 3 стани. 
-            //    Тобто щоб відкотити хід бота і свій, треба мати мінімум 2 ходи в історії.
-            
             if (CurrentGameMode != GameMode.Training) return;
-            if (_history.Count < 2) return; // Нема куди вертати
+            if (CurrentTurn == BotColor) return; 
 
-            // Якщо зараз хід Бота (він думає), не можна перебивати
-            if (CurrentTurn == BotColor) return;
+            int statesToRemove = (BotColor != PieceColor.None) ? 2 : 1;
 
-            // ЛОГІКА ВІДКАТУ
-            // Нам треба видалити ОСТАННІЙ стан (де походив бот) і ПЕРЕДОСТАННІЙ (де походив я).
-            // Тобто ми повертаємося до стану _history.Count - 3 (або просто видаляємо 2 останні)
-            
-            // Видаляємо останній стан (Хід бота)
-            _history.RemoveAt(_history.Count - 1);
-            
-            // Видаляємо передостанній стан (Мій хід)
-            if (_history.Count > 0)
+            if (_history.Count <= statesToRemove) return;
+
+            // 1. ВІЗУАЛЬНА ЧИСТКА
+            if (_lastFromSquare != null) ResetSquareColor(_lastFromSquare);
+            if (_lastToSquare != null) ResetSquareColor(_lastToSquare);
+            if (SelectedSquare != null) 
             {
-                _history.RemoveAt(_history.Count - 1);
+                ResetSquareColor(SelectedSquare);
+                SelectedSquare = null;
             }
-            
-            // Також чистимо PGN текст і список ходів, бо вони "відрізаються"
-            // Але оскільки ми повністю перезавантажуємо стан з LoadState, 
-            // то PgnText і MoveHistory відновляться зі збереженого стану автоматично!
+            ClearPossibleMoves();
 
-            // Завантажуємо актуальний останній стан
+            // 2. ВИДАЛЕННЯ З ІСТОРІЇ
+            for (int i = 0; i < statesToRemove; i++)
+            {
+                // Видаляємо стан гри
+                _history.RemoveAt(_history.Count - 1);
+                
+                // 👇 ВИПРАВЛЕННЯ ТУТ: Працюємо з MoveHistory замість PgnMoves
+                if (MoveHistory.Count > 0)
+                {
+                    MoveHistory.RemoveAt(MoveHistory.Count - 1);
+                }
+            }
+
+            // Оновлюємо текст на екрані
+            RebuildPgnText(); 
+
+            // 3. ЗАВАНТАЖЕННЯ СТАРОГО СТАНУ
             _currentMoveIndex = _history.Count - 1;
             LoadState(_history[_currentMoveIndex]);
 
-            // Якщо гра закінчилась (мат/пат), ми її "воскрешаємо"
             IsGameOver = false;
             GameStatus = GameStatus.InProgress;
         }
-    
+
+        private void RebuildPgnText()
+        {
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < MoveHistory.Count; i++)
+            {
+                if (i % 2 == 0)
+                    sb.Append($"{(i / 2) + 1}. {MoveHistory[i]} ");
+                else
+                    sb.Append($"{MoveHistory[i]} ");
+            }
+            PgnText = sb.ToString();
+        }
+
         private void UpdateSquareColor(SquareModel square)
         {
             // 1. ПРІОРИТЕТ: ШАХ (Найважливіше!)
@@ -843,6 +948,39 @@ namespace ChessTrainerApp.ViewModels
             // Альтернатива (якщо ти хочеш примусово відкрити нову PlayPage):
             // await Shell.Current.Navigation.PushAsync(new PlayPage());
             // Але PopAsync - це правильний і "чистий" спосіб для кнопки "Назад/Меню".
+        }
+    
+        private string GetPositionSignature()
+        {
+            var sb = new System.Text.StringBuilder();
+
+            // 1. Розташування фігур
+            foreach (var square in Squares)
+            {
+                if (square.Piece.Type == PieceType.None) 
+                    sb.Append("1"); // Пусто
+                else 
+                    sb.Append(square.Piece.Symbol); // Наприклад "WP" (White Pawn)
+            }
+
+            // 2. Чий хід
+            sb.Append($"|{CurrentTurn}");
+
+            // 3. Можливості рокіровки (Важливо! Якщо король ходив - це інша позиція)
+            // Просто перевіримо, чи рухалися Королі та Тури
+            var whiteKing = Squares.FirstOrDefault(s => s.Piece.Type == PieceType.King && s.Piece.Color == PieceColor.White);
+            var blackKing = Squares.FirstOrDefault(s => s.Piece.Type == PieceType.King && s.Piece.Color == PieceColor.Black);
+            
+            sb.Append($"|WK:{whiteKing?.Piece.HasMoved ?? true}");
+            sb.Append($"|BK:{blackKing?.Piece.HasMoved ?? true}");
+            
+            // (Можна додати тури, але для курсової короля зазвичай достатньо)
+
+            // 4. En Passant (це теж впливає на унікальність)
+            if (EnPassantTarget != null)
+                sb.Append($"|EP:{EnPassantTarget.PositionName}");
+
+            return sb.ToString();
         }
     }
 }

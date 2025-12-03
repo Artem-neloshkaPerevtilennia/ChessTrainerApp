@@ -1052,3 +1052,7 @@ C:\GitHub\ChessTrainerApp\obj\Debug\net8.0-android\stamp\_ConvertResourcesCases.
 C:\GitHub\ChessTrainerApp\obj\Debug\net8.0-android\stamp\_GenerateJavaStubs.stamp
 C:\GitHub\ChessTrainerApp\obj\Debug\net8.0-android\stamp\_GeneratePackageManagerJava.stamp
 C:\GitHub\ChessTrainerApp\obj\Debug\net8.0-android\stamp\_ResolveLibraryProjectImports.stamp
+C:\GitHub\ChessTrainerApp\obj\Debug\net8.0-android\android\assets\Microsoft.Maui.Controls.HotReload.Forms.dll
+C:\GitHub\ChessTrainerApp\obj\Debug\net8.0-android\android\assets\Microsoft.VisualStudio.DesignTools.MobileTapContracts.dll
+C:\GitHub\ChessTrainerApp\obj\Debug\net8.0-android\android\assets\Microsoft.VisualStudio.DesignTools.TapContract.dll
+C:\GitHub\ChessTrainerApp\obj\Debug\net8.0-android\android\assets\Microsoft.VisualStudio.DesignTools.XamlTapContract.dll

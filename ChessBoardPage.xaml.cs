@@ -44,10 +44,9 @@ public partial class ChessBoardPage : ContentPage
     {
         base.OnSizeAllocated(width, height);
         
-        // Шукаємо Border з іменем ChessBoardContainer (він має бути в XAML)
-        // Якщо ти його перейменував або видалив - тут буде null
         if (ChessBoardContainer == null) return;
 
+        // ... (Твій код розрахунку size дошки) ...
         double safeHeight = height - 280; 
         double size = Math.Min(width, safeHeight);
         size -= 20; 
@@ -56,11 +55,16 @@ public partial class ChessBoardPage : ContentPage
         ChessBoardContainer.WidthRequest = size;
         ChessBoardContainer.HeightRequest = size;
 
+        // Розрахунок
         double cellSize = size / 8;
         
         PieceFontSize = cellSize * 0.75; 
-        DotSize = cellSize * 0.30; 
-        RingSize = cellSize * 0.90;
+        DotSize = cellSize * 0.30; // 30% від клітинки
+        RingSize = cellSize * 0.90; // 90% від клітинки
+
+        // 👇 ДОДАЙ ЦЕЙ ВИКЛИК 👇
+        // Оновлюємо розміри існуючих кружечків
+        UpdateShapesSizes();
     }
 
     private void OnPageLoaded(object sender, EventArgs e)
@@ -93,13 +97,23 @@ public partial class ChessBoardPage : ContentPage
         if (BoardGrid == null) return;
         BoardGrid.Children.Clear(); 
 
-        // Беремо актуальний розмір крапки прямо зараз
-        double currentDotSize = DotSize > 0 ? DotSize : 15; // Якщо 0, то хоча б 15
-        double currentRingSize = RingSize > 0 ? RingSize : 35;
+        // 1. ОТРИМУЄМО ЖИВІ РОЗМІРИ (Явне число)
+        // Якщо DotSize ще не порахувався (0), беремо 15.
+        double pixelDotSize = DotSize > 0 ? DotSize : 15;
+        double pixelRingSize = RingSize > 0 ? RingSize : 35;
 
         foreach (var square in squares)
         {
-            var cellView = new Grid { BindingContext = square };
+            var cellView = new Grid
+            {
+                BindingContext = square,
+                // 👇 ЦЕ ВАЖЛИВО: Кажемо клітинці "Ігноруй відступи"
+                Padding = 0,
+                Margin = 0,
+                // Для дебагу меж клітинки можна розкоментувати:
+                // BorderColor = Colors.Yellow, BorderThickness = 1
+            };
+            
             cellView.SetBinding(Grid.BackgroundColorProperty, nameof(SquareModel.SquareColor));
             
             var tap = new TapGestureRecognizer();
@@ -107,36 +121,53 @@ public partial class ChessBoardPage : ContentPage
             tap.CommandParameter = square;
             cellView.GestureRecognizers.Add(tap);
 
-            // --- КРАПКА ---
+            // --- 🔴 КРАПКА (БЕЗ BINDING РОЗМІРУ) ---
             var dot = new Ellipse
             {
-                Fill = Color.FromRgba("#AA000000"),
+                // 👇 ТИМЧАСОВО ЧЕРВОНИЙ, ЩОБ ЗНАЙТИ ЇЇ
+                Fill = Color.FromRgba("rgba(0, 0, 0, 0.5)"), 
+                
+                // Центрування
                 HorizontalOptions = LayoutOptions.Center,
                 VerticalOptions = LayoutOptions.Center,
-                InputTransparent = true,
                 
-                // ❗ ВСТАНОВЛЮЄМО РОЗМІР ПРЯМО ТУТ (БЕЗ BINDING)
-                WidthRequest = currentDotSize,
-                HeightRequest = currentDotSize
-            };
-            // Тільки видимість прив'язуємо
-            dot.SetBinding(Ellipse.IsVisibleProperty, nameof(SquareModel.IsRegularMoveHint));
+                InputTransparent = true,
 
-            // --- КІЛЬЦЕ ---
+                // 👇 ЯВНЕ ЗАДАННЯ РОЗМІРУ (Без Binding)
+                WidthRequest = pixelDotSize,
+                HeightRequest = pixelDotSize,
+                
+                // Початкова видимість
+                IsVisible = square.IsRegularMoveHint
+            };
+
             var ring = new Ellipse
             {
-                Stroke = Color.FromRgba("#AA000000"),
+                Stroke = Color.FromRgba("rgba(0, 0, 0, 0.5)"),
                 StrokeThickness = 5,
                 Fill = Colors.Transparent,
                 HorizontalOptions = LayoutOptions.Center,
                 VerticalOptions = LayoutOptions.Center,
                 InputTransparent = true,
+                WidthRequest = pixelRingSize,
+                HeightRequest = pixelRingSize,
                 
-                // ❗ РОЗМІР ПРЯМО ТУТ
-                WidthRequest = currentRingSize,
-                HeightRequest = currentRingSize
+                // 👇 ВАЖЛИВО 1: Встановлюємо початковий стан одразу!
+                IsVisible = square.IsCaptureHint
             };
-            ring.SetBinding(Ellipse.IsVisibleProperty, nameof(SquareModel.IsCaptureHint));
+
+            // Підписуємось на зміни видимості
+            square.PropertyChanged += (s, e) => 
+            {
+                if (e.PropertyName == nameof(SquareModel.IsRegularMoveHint))
+                {
+                    MainThread.BeginInvokeOnMainThread(() => dot.IsVisible = square.IsRegularMoveHint);
+                }
+                if (e.PropertyName == nameof(SquareModel.IsCaptureHint))
+                {
+                    ring.IsVisible = square.IsCaptureHint;
+                }
+            };
 
             // --- ФІГУРА ---
             var label = new Label
@@ -148,6 +179,7 @@ public partial class ChessBoardPage : ContentPage
                 VerticalTextAlignment = TextAlignment.Center,
                 InputTransparent = true
             };
+            
             label.SetBinding(Label.TextProperty, "Piece.DisplayValue");
             if (Resources.TryGetValue("PieceColorConverter", out var converter))
             {
@@ -156,6 +188,7 @@ public partial class ChessBoardPage : ContentPage
             label.SetBinding(VisualElement.OpacityProperty, nameof(SquareModel.TextOpacity));
             label.SetBinding(Label.FontSizeProperty, new Binding(nameof(PieceFontSize), source: this));
 
+            // Додаємо
             cellView.Children.Add(dot);
             cellView.Children.Add(ring);
             cellView.Children.Add(label);
@@ -165,7 +198,7 @@ public partial class ChessBoardPage : ContentPage
         
         if (BindingContext is ChessBoardViewModel vm) UpdateRotation(vm.BoardRotation);
     }
-
+    
     private void UpdateRotation(double rotationAngle)
     {
         if (BoardGrid == null) return;
@@ -181,6 +214,38 @@ public partial class ChessBoardPage : ContentPage
                     if (item is Label label)
                     {
                         label.Rotation = rotationAngle;
+                    }
+                }
+            }
+        }
+    }
+
+    private void UpdateShapesSizes()
+    {
+        if (BoardGrid == null) return;
+
+        foreach (var child in BoardGrid.Children)
+        {
+            if (child is Grid cell)
+            {
+                foreach (var item in cell.Children)
+                {
+                    if (item is Ellipse shape)
+                    {
+                        // 👇 ВИПРАВЛЕНА ЛОГІКА ПОРІВНЯННЯ 👇
+                        // Перевіряємо: "Якщо заливка це Суцільний Колір І він НЕ Прозорий" -> Значить це КРАПКА
+                        if (shape.Fill is SolidColorBrush brush && brush.Color.Alpha > 0)
+                        {
+                            // Це Крапка (бо має видимий колір)
+                            shape.WidthRequest = DotSize;
+                            shape.HeightRequest = DotSize;
+                        }
+                        else
+                        {
+                            // Це Кільце (бо заливка прозора або відсутня)
+                            shape.WidthRequest = RingSize;
+                            shape.HeightRequest = RingSize;
+                        }
                     }
                 }
             }
