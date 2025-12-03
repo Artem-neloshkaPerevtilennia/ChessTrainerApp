@@ -9,20 +9,16 @@ namespace ChessTrainerApp.Models
         public PieceColor Color { get; set; }
         public bool HasMoved { get; set; } = false;
 
-        // Допоміжна властивість для відображення (наприклад, "WK" для Білого Короля)
         public string Symbol => $"{Color.ToString()[0]}{Type.ToString()[0]}"; 
         
-        // Відображення фігур
         public string DisplayValue
         {
             get
             {
                 if (Type == PieceType.None) return "";
 
-                // Базові коди Unicode для білих фігур
                 int baseCode = 0x2654; 
                 
-                // Зміщення для типу фігури
                 int offset = Type switch
                 {
                     PieceType.King => 0,
@@ -34,7 +30,6 @@ namespace ChessTrainerApp.Models
                     _ => 0
                 };
 
-                // Якщо чорні, додаємо ще 6 до коду
                 if (Color == PieceColor.Black)
                 {
                     offset += 6;

@@ -2,7 +2,6 @@ namespace ChessTrainerApp.Services;
 
 public static class EvaluationTables
 {
-    // Пішаки люблять йти вперед. Центр важливіший.
     public static readonly int[] PawnTable = new int[]
     {
         0,  0,  0,  0,  0,  0,  0,  0,
@@ -15,7 +14,6 @@ public static class EvaluationTables
         0,  0,  0,  0,  0,  0,  0,  0
     };
 
-    // Коні люблять центр, ненавидять кути.
     public static readonly int[] KnightTable = new int[]
     {
         -50,-40,-30,-30,-30,-30,-40,-50,
@@ -28,7 +26,6 @@ public static class EvaluationTables
         -50,-40,-30,-30,-30,-30,-40,-50
     };
 
-    // Слони люблять довгі діагоналі і центр.
     public static readonly int[] BishopTable = new int[]
     {
         -20,-10,-10,-10,-10,-10,-10,-20,
@@ -41,7 +38,6 @@ public static class EvaluationTables
         -20,-10,-10,-10,-10,-10,-10,-20
     };
 
-    // Тури люблять 7-му горизонталь і центральні вертикалі.
     public static readonly int[] RookTable = new int[]
     {
         0,  0,  0,  0,  0,  0,  0,  0,
@@ -54,7 +50,6 @@ public static class EvaluationTables
         0,  0,  0,  5,  5,  0,  0,  0
     };
 
-    // Ферзь (схоже на слона + туру, але обережніше на старті).
     public static readonly int[] QueenTable = new int[]
     {
         -20,-10,-10, -5, -5,-10,-10,-20,
@@ -67,7 +62,6 @@ public static class EvaluationTables
         -20,-10,-10, -5, -5,-10,-10,-20
     };
 
-    // Король (Мідлшпіль) - має ховатися за пішаками (рокировка).
     public static readonly int[] KingMiddleGameTable = new int[]
     {
         -30,-40,-40,-50,-50,-40,-40,-30,
@@ -79,7 +73,4 @@ public static class EvaluationTables
         20, 20,  0,  0,  0,  0, 20, 20,
         20, 30, 10,  0,  0, 10, 30, 20
     };
-    
-    // (Для ендшпілю таблиця короля має бути іншою - він має бігти в центр, 
-    // але поки що вистачить мідлшпілю, щоб він не зівав мати на старті).
 }

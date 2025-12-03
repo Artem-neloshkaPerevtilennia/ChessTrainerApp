@@ -6,13 +6,11 @@ namespace ChessTrainerApp.ViewModels;
 
 public partial class PlayViewModel : ObservableObject
 {
-    // Обраний колір: "White", "Black" або "Random"
     [ObservableProperty]
     private string selectedColorSide = "White";
 
-    // Обранa складність (індекс у пікері: 0=Easy, 1=Medium, 2=Hard)
     [ObservableProperty]
-    private int selectedDifficultyIndex = 1; // За замовчуванням Середня
+    private int selectedDifficultyIndex = 1;
 
     [ObservableProperty]
     private int _selectedGameModeIndex = 0;
@@ -27,9 +25,9 @@ public partial class PlayViewModel : ObservableObject
     }
 
     [RelayCommand]
+    [Obsolete]
     private async Task StartGame()
     {
-        // 1. Визначаємо глибину
         int depth = SelectedDifficultyIndex switch
         {
             0 => 2,
@@ -38,7 +36,6 @@ public partial class PlayViewModel : ObservableObject
             _ => 3
         };
 
-        // 2. Визначаємо колір
         PieceColor playerColor = SelectedColorSide switch
         {
             "Random" => new Random().Next(0, 2) == 0 ? PieceColor.White : PieceColor.Black,

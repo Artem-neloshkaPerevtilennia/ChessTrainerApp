@@ -4,8 +4,8 @@ namespace ChessTrainerApp.Models;
 
 public partial class PgnMoveModel : ObservableObject
 {
-    public string Text { get; set; } // Наприклад "1. e4" або "e5"
+    public string? Text { get; set; }
     
     [ObservableProperty]
-    private bool isSelected; // Чи це поточний хід (для білого прямокутника)
+    private bool isSelected;
 }
