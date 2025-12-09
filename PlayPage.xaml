@@ -29,7 +29,7 @@
 
                         <HorizontalStackLayout Spacing="20" HorizontalOptions="Center">
                             
-                            <Border StrokeThickness="3" BackgroundColor="#80000000"
+                            <Border StrokeThickness="3" BackgroundColor="#80706E6E"
                                     HeightRequest="80" WidthRequest="80" StrokeShape="RoundRectangle 10">
                                 <Border.Stroke>
                                     <SolidColorBrush Color="Transparent"/>
@@ -46,7 +46,7 @@
                                 </Border.GestureRecognizers>
                             </Border>
 
-                            <Border StrokeThickness="3" BackgroundColor="#80000000"
+                            <Border StrokeThickness="3" BackgroundColor="#80706E6E"
                                     HeightRequest="80" WidthRequest="80" StrokeShape="RoundRectangle 10">
                                 <Border.Stroke>
                                     <SolidColorBrush Color="Transparent"/>
@@ -63,7 +63,7 @@
                                 </Border.GestureRecognizers>
                             </Border>
 
-                            <Border StrokeThickness="3" BackgroundColor="#80000000"
+                            <Border StrokeThickness="3" BackgroundColor="#80706E6E"
                                     HeightRequest="80" WidthRequest="80" StrokeShape="RoundRectangle 10">
                                 <Border.Stroke>
                                     <SolidColorBrush Color="Transparent"/>

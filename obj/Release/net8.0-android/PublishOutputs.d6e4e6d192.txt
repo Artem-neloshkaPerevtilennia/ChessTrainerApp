@@ -1,0 +1,4 @@
+C:\GitHub\ChessTrainerApp\bin\Release\net8.0-android\publish\com.companyname.chesstrainerapp-Signed.aab
+C:\GitHub\ChessTrainerApp\bin\Release\net8.0-android\publish\com.companyname.chesstrainerapp.aab
+C:\GitHub\ChessTrainerApp\bin\Release\net8.0-android\publish\com.companyname.chesstrainerapp-Signed.apk
+C:\GitHub\ChessTrainerApp\bin\Release\net8.0-android\publish\_Microsoft.Android.Resource.Designer.dll
